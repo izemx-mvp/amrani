@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { packs } from "@/lib/mock-data";
+import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Check, Star } from "lucide-react";
 
