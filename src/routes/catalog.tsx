@@ -16,9 +16,9 @@ export const Route = createFileRoute("/catalog")({
   component: Catalog,
 });
 
-const LEVELS = ["Débutant", "Intermédiaire", "Avancé", "Tous niveaux"] as const;
-const CATEGORIES = ["Yoga", "Pilates"] as const;
-const FORMATS = ["Collectif", "Individuel"] as const;
+const LEVELS: string[] = ["Débutant", "Intermédiaire", "Avancé", "Tous niveaux"];
+const CATEGORIES: string[] = ["Yoga", "Pilates"];
+const FORMATS: string[] = ["Collectif", "Individuel"];
 
 function Catalog() {
   const [q, setQ] = useState("");
@@ -80,7 +80,7 @@ function Catalog() {
           </div>
           <FilterRow label="Discipline" options={CATEGORIES} value={cat} onChange={setCat} />
           <FilterRow label="Format" options={FORMATS} value={format} onChange={setFormat} />
-          <FilterRow label="Niveau" options={LEVELS as unknown as string[]} value={level} onChange={setLevel} />
+          <FilterRow label="Niveau" options={LEVELS} value={level} onChange={setLevel} />
           <FilterRow label="Coach" options={coaches.map(c => c.name)} value={coachId ? coaches.find(c => c.id === coachId)?.name ?? null : null}
             onChange={(name) => setCoachId(name ? coaches.find(c => c.name === name)?.id ?? null : null)} />
           <FilterRow label="Jour" options={days.map(([, l]) => l)} value={day ? days.find(([k]) => k === day)?.[1] ?? null : null}

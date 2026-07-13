@@ -82,7 +82,7 @@ function Detail() {
       <section className="container-editorial grid md:grid-cols-2 gap-10 pb-16">
         <Block title="Objectifs & bénéfices">
           <ul className="space-y-2">
-            {activity.benefits.map(b => (
+            {activity.benefits.map((b: string) => (
               <li key={b} className="flex items-start gap-2 text-sm"><Sparkles className="h-4 w-4 mt-0.5 text-[color:var(--forest)]" />{b}</li>
             ))}
             <li className="flex items-start gap-2 text-sm"><Check className="h-4 w-4 mt-0.5 text-[color:var(--forest)]" />Meilleure conscience corporelle</li>
