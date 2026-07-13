@@ -14,6 +14,7 @@ import { Route as PlanningRouteImport } from './routes/planning'
 import { Route as PacksRouteImport } from './routes/packs'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ClientRouteImport } from './routes/client'
+import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as BookingRouteImport } from './routes/booking'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -27,6 +28,7 @@ import { Route as ClientProfileRouteImport } from './routes/client.profile'
 import { Route as ClientPacksRouteImport } from './routes/client.packs'
 import { Route as ClientNotificationsRouteImport } from './routes/client.notifications'
 import { Route as ClientBookingsRouteImport } from './routes/client.bookings'
+import { Route as CatalogIdRouteImport } from './routes/catalog.$id'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
@@ -66,6 +68,11 @@ const ContactRoute = ContactRouteImport.update({
 const ClientRoute = ClientRouteImport.update({
   id: '/client',
   path: '/client',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogRoute = CatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookingRoute = BookingRouteImport.update({
@@ -132,6 +139,11 @@ const ClientBookingsRoute = ClientBookingsRouteImport.update({
   id: '/bookings',
   path: '/bookings',
   getParentRoute: () => ClientRoute,
+} as any)
+const CatalogIdRoute = CatalogIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => CatalogRoute,
 } as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/$slug',
@@ -217,6 +229,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
   '/booking': typeof BookingRoute
+  '/catalog': typeof CatalogRouteWithChildren
   '/client': typeof ClientRouteWithChildren
   '/contact': typeof ContactRoute
   '/packs': typeof PacksRoute
@@ -237,6 +250,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/catalog/$id': typeof CatalogIdRoute
   '/client/bookings': typeof ClientBookingsRoute
   '/client/notifications': typeof ClientNotificationsRoute
   '/client/packs': typeof ClientPacksRoute
@@ -251,6 +265,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
   '/booking': typeof BookingRoute
+  '/catalog': typeof CatalogRouteWithChildren
   '/contact': typeof ContactRoute
   '/packs': typeof PacksRoute
   '/planning': typeof PlanningRoute
@@ -270,6 +285,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/catalog/$id': typeof CatalogIdRoute
   '/client/bookings': typeof ClientBookingsRoute
   '/client/notifications': typeof ClientNotificationsRoute
   '/client/packs': typeof ClientPacksRoute
@@ -286,6 +302,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
   '/booking': typeof BookingRoute
+  '/catalog': typeof CatalogRouteWithChildren
   '/client': typeof ClientRouteWithChildren
   '/contact': typeof ContactRoute
   '/packs': typeof PacksRoute
@@ -306,6 +323,7 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/catalog/$id': typeof CatalogIdRoute
   '/client/bookings': typeof ClientBookingsRoute
   '/client/notifications': typeof ClientNotificationsRoute
   '/client/packs': typeof ClientPacksRoute
@@ -323,6 +341,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/blog'
     | '/booking'
+    | '/catalog'
     | '/client'
     | '/contact'
     | '/packs'
@@ -343,6 +362,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/users'
     | '/blog/$slug'
+    | '/catalog/$id'
     | '/client/bookings'
     | '/client/notifications'
     | '/client/packs'
@@ -357,6 +377,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/blog'
     | '/booking'
+    | '/catalog'
     | '/contact'
     | '/packs'
     | '/planning'
@@ -376,6 +397,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/users'
     | '/blog/$slug'
+    | '/catalog/$id'
     | '/client/bookings'
     | '/client/notifications'
     | '/client/packs'
@@ -391,6 +413,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/blog'
     | '/booking'
+    | '/catalog'
     | '/client'
     | '/contact'
     | '/packs'
@@ -411,6 +434,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/users'
     | '/blog/$slug'
+    | '/catalog/$id'
     | '/client/bookings'
     | '/client/notifications'
     | '/client/packs'
@@ -427,6 +451,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BlogRoute: typeof BlogRouteWithChildren
   BookingRoute: typeof BookingRoute
+  CatalogRoute: typeof CatalogRouteWithChildren
   ClientRoute: typeof ClientRouteWithChildren
   ContactRoute: typeof ContactRoute
   PacksRoute: typeof PacksRoute
@@ -469,6 +494,13 @@ declare module '@tanstack/react-router' {
       path: '/client'
       fullPath: '/client'
       preLoaderRoute: typeof ClientRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catalog': {
+      id: '/catalog'
+      path: '/catalog'
+      fullPath: '/catalog'
+      preLoaderRoute: typeof CatalogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/booking': {
@@ -561,6 +593,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/client/bookings'
       preLoaderRoute: typeof ClientBookingsRouteImport
       parentRoute: typeof ClientRoute
+    }
+    '/catalog/$id': {
+      id: '/catalog/$id'
+      path: '/$id'
+      fullPath: '/catalog/$id'
+      preLoaderRoute: typeof CatalogIdRouteImport
+      parentRoute: typeof CatalogRoute
     }
     '/blog/$slug': {
       id: '/blog/$slug'
@@ -718,6 +757,17 @@ const BlogRouteChildren: BlogRouteChildren = {
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
+interface CatalogRouteChildren {
+  CatalogIdRoute: typeof CatalogIdRoute
+}
+
+const CatalogRouteChildren: CatalogRouteChildren = {
+  CatalogIdRoute: CatalogIdRoute,
+}
+
+const CatalogRouteWithChildren =
+  CatalogRoute._addFileChildren(CatalogRouteChildren)
+
 interface ClientRouteChildren {
   ClientBookingsRoute: typeof ClientBookingsRoute
   ClientNotificationsRoute: typeof ClientNotificationsRoute
@@ -745,6 +795,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BlogRoute: BlogRouteWithChildren,
   BookingRoute: BookingRoute,
+  CatalogRoute: CatalogRouteWithChildren,
   ClientRoute: ClientRouteWithChildren,
   ContactRoute: ContactRoute,
   PacksRoute: PacksRoute,
