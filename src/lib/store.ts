@@ -19,6 +19,25 @@ export type BookingSource = "Site web" | "Application" | "Téléphone" | "WhatsA
 
 export type HistoryEvent = { ts: string; label: string };
 
+export type BookingTreatment =
+  | "Créée par le client"
+  | "Créée manuellement"
+  | "Analysée par l'IA"
+  | "Confirmée par l'IA"
+  | "En attente de validation humaine"
+  | "Validée par un administrateur"
+  | "Modifiée par l'équipe";
+
+export type AIAnalysis = {
+  summary: string;
+  checks: { label: string; ok: boolean }[];
+  availability: string;
+  alternatives: { scheduleId: string; label: string }[];
+  risks: string[];
+  recommendation: string;
+  problem?: string;
+};
+
 export type Booking = {
   id: string;
   clientId: string;
@@ -37,6 +56,18 @@ export type Booking = {
   paymentMode: PaymentMode;
   amount: number;
   history: HistoryEvent[];
+  treatment?: BookingTreatment;
+  aiConfidence?: number;
+  aiAnalysis?: AIAnalysis;
+  needsHumanValidation?: boolean;
+  aiValidatedBy?: string;
+};
+
+export type AutomationMode = "auto" | "semi" | "manual";
+export type AIJournalEntry = {
+  id: string; ts: string; action: string; module: string;
+  clientName?: string; bookingId?: string; confidence?: number;
+  decision: string; humanValidation?: boolean; validatedBy?: string; result: string;
 };
 
 export type Pack = {
