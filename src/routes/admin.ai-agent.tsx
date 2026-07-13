@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useState, useMemo } from "react";
 import {
-  Bot, CheckCircle2, AlertTriangle, Activity, Clock, MessageSquare, BookOpen,
+  Bot, CheckCircle2, AlertTriangle, Activity, MessageSquare, BookOpen,
   Settings2, ListChecks, ScrollText, Zap, Power, Play, Send, Search, XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
