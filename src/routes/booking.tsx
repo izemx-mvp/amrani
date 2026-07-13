@@ -26,9 +26,13 @@ export const Route = createFileRoute("/booking")({
 const STEPS = ["Cours", "Date & horaire", "Mode", "Récapitulatif", "Confirmation"];
 
 function Booking() {
-  const { isAuthenticated, hydrated } = useAuth();
+  const { user, isAuthenticated, hydrated } = useAuth();
   const { course, slot } = Route.useSearch();
   const nav = useNavigate();
+
+  const activities = useStore(s => s.activities.filter(a => a.active));
+  const schedule = useStore(s => s.schedule.filter(s => s.active));
+  const packs = useStore(s => s.packs.filter(p => p.active));
 
   const [step, setStep] = useState(0);
   const [activityId, setActivityId] = useState<string | undefined>(course || undefined);
@@ -68,6 +72,17 @@ function Booking() {
   const pack = packId ? packs.find(p => p.id === packId) : undefined;
 
   const confirm = () => {
+    if (!activity || !currentSlot || !user) return;
+    const client = ensureClientByEmail(user.email, user.firstName, user.lastName, user.phone);
+    actions.addBooking({
+      clientId: client.id, clientName: client.name, clientEmail: client.email,
+      scheduleId: currentSlot.id, activityId: activity.id, coachId: currentSlot.coachId, start: currentSlot.start,
+      packId: mode === "pack" ? (packId ?? null) : null,
+      status: "En attente", source: "Site web",
+      paymentStatus: mode === "pack" ? "Payé" : "En attente",
+      paymentMode: mode === "pack" ? "Pack" : "En ligne",
+      amount: activity.price ?? 150,
+    });
     setDone(true);
     setStep(4);
     toast.success("Réservation envoyée · en attente de validation");
