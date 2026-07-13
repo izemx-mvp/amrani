@@ -19,6 +19,25 @@ export type BookingSource = "Site web" | "Application" | "Téléphone" | "WhatsA
 
 export type HistoryEvent = { ts: string; label: string };
 
+export type BookingTreatment =
+  | "Créée par le client"
+  | "Créée manuellement"
+  | "Analysée par l'IA"
+  | "Confirmée par l'IA"
+  | "En attente de validation humaine"
+  | "Validée par un administrateur"
+  | "Modifiée par l'équipe";
+
+export type AIAnalysis = {
+  summary: string;
+  checks: { label: string; ok: boolean }[];
+  availability: string;
+  alternatives: { scheduleId: string; label: string }[];
+  risks: string[];
+  recommendation: string;
+  problem?: string;
+};
+
 export type Booking = {
   id: string;
   clientId: string;
@@ -37,6 +56,18 @@ export type Booking = {
   paymentMode: PaymentMode;
   amount: number;
   history: HistoryEvent[];
+  treatment?: BookingTreatment;
+  aiConfidence?: number;
+  aiAnalysis?: AIAnalysis;
+  needsHumanValidation?: boolean;
+  aiValidatedBy?: string;
+};
+
+export type AutomationMode = "auto" | "semi" | "manual";
+export type AIJournalEntry = {
+  id: string; ts: string; action: string; module: string;
+  clientName?: string; bookingId?: string; confidence?: number;
+  decision: string; humanValidation?: boolean; validatedBy?: string; result: string;
 };
 
 export type Pack = {
@@ -84,11 +115,80 @@ type State = {
   clients: Client[];
   bookings: Booking[];
   payments: Payment[];
+  automation: { mode: AutomationMode; enabled: boolean };
+  aiJournal: AIJournalEntry[];
 };
 
-const KEY = "amrani.store.v3";
+const KEY = "amrani.store.v5";
 
 function seed(): State {
+  const bookings = seedBookings.map((b, i) => {
+    const status = b.status as BookingStatus;
+    const isConfirmed = status === "Confirmée" || status === "Terminée";
+    const isPending = status === "En attente";
+    // Enrich with AI treatment metadata for demo purposes.
+    let treatment: BookingTreatment = "Créée par le client";
+    let confidence: number | undefined;
+    let needsHuman = false;
+    let analysis: AIAnalysis | undefined;
+    if (isConfirmed && i % 3 !== 0) {
+      treatment = "Confirmée par l'IA";
+      confidence = 85 + (i * 7) % 14;
+    } else if (isPending) {
+      needsHuman = i % 2 === 0;
+      treatment = needsHuman ? "En attente de validation humaine" : "Analysée par l'IA";
+      confidence = needsHuman ? 45 + (i * 11) % 25 : 70 + (i * 5) % 15;
+      if (needsHuman) {
+        const problems = [
+          "Pack expiré — paiement requis",
+          "Cours complet — surbooking possible",
+          "Coach demandé indisponible",
+          "Paiement en attente",
+          "Créneau hors politique d'annulation",
+        ];
+        analysis = {
+          summary: `Le client ${b.clientName} demande cette séance via ${["site web", "WhatsApp", "application"][i % 3]}.`,
+          checks: [
+            { label: "Cours actif", ok: true },
+            { label: "Coach disponible", ok: i % 3 !== 0 },
+            { label: "Places restantes", ok: i % 4 !== 0 },
+            { label: "Pack compatible", ok: false },
+            { label: "Paiement à jour", ok: false },
+          ],
+          availability: i % 4 === 0 ? "Créneau complet" : "Créneau disponible",
+          alternatives: [],
+          risks: ["Nécessite validation humaine"],
+          recommendation: "Contacter le client pour confirmer le mode de paiement avant validation.",
+          problem: problems[i % problems.length],
+        };
+      }
+    }
+    return {
+      ...b,
+      clientEmail: seedClients.find(c => c.id === b.clientId)?.email,
+      status,
+      source: (["Site web", "Application", "WhatsApp", "Téléphone"] as BookingSource[])[i % 4],
+      paymentStatus: (isConfirmed ? "Payé" : "En attente") as PaymentStatus,
+      paymentMode: "Pack" as PaymentMode,
+      amount: 150,
+      history: [{ ts: b.createdAt, label: "Réservation créée" }],
+      treatment, aiConfidence: confidence, needsHumanValidation: needsHuman, aiAnalysis: analysis,
+    };
+  });
+
+  const journal: AIJournalEntry[] = bookings.slice(0, 18).map((b, i) => ({
+    id: `j${i + 1}`,
+    ts: new Date(Date.now() - i * 3600 * 1000).toISOString(),
+    action: b.needsHumanValidation ? "Validation humaine demandée" : (b.treatment === "Confirmée par l'IA" ? "Réservation confirmée" : "Disponibilité vérifiée"),
+    module: "Réservations",
+    clientName: b.clientName,
+    bookingId: b.id,
+    confidence: b.aiConfidence,
+    decision: b.needsHumanValidation ? "En attente" : "Automatique",
+    humanValidation: b.needsHumanValidation,
+    result: b.needsHumanValidation ? "Envoyée en file d'attente" : "Succès",
+  }));
+
   return {
     activities: seedActivities.map(a => ({ ...a, price: 150, active: true })),
     schedule: seedSchedule.map(s => ({ ...s, room: "Salle A", active: true })),
@@ -97,26 +197,15 @@ function seed(): State {
       ...p, type: "Pourcentage" as const, value: 20, active: true, uses: Math.floor(Math.random() * 30),
     })),
     clients: seedClients.map(c => ({ ...c, createdAt: new Date(Date.now() - Math.random() * 1e10).toISOString(), notes: "" })),
-    bookings: seedBookings.map(b => ({
-      ...b,
-      clientEmail: seedClients.find(c => c.id === b.clientId)?.email,
-      status: b.status as BookingStatus,
-      source: "Site web" as BookingSource,
-      paymentStatus: (b.status === "Confirmée" || b.status === "Terminée") ? "Payé" : "En attente" as PaymentStatus,
-      paymentMode: "Pack" as PaymentMode,
-      amount: 150,
-      history: [{ ts: b.createdAt, label: "Réservation créée" }],
-    })),
+    bookings,
     payments: seedBookings.slice(0, 12).map((b, i) => ({
-      id: `p${i + 1}`,
-      clientId: b.clientId,
-      clientName: b.clientName,
-      bookingId: b.id,
-      amount: 150,
+      id: `p${i + 1}`, clientId: b.clientId, clientName: b.clientName, bookingId: b.id, amount: 150,
       mode: (["Carte bancaire", "Espèces", "En ligne", "Pack"] as PaymentMode[])[i % 4],
       status: (["Payé", "Payé", "En attente", "Payé"] as PaymentStatus[])[i % 4],
       date: new Date(Date.now() - i * 86400000).toISOString(),
     })),
+    automation: { mode: "semi", enabled: true },
+    aiJournal: journal,
   };
 }
 
@@ -288,7 +377,65 @@ export const actions = {
     state = { ...state, payments: state.payments.map(p => p.id === id ? { ...p, status } : p) };
     notify();
   },
+
+  // AI Agent
+  setAutomationMode(mode: AutomationMode) {
+    state = { ...state, automation: { ...state.automation, mode } };
+    notify();
+  },
+  toggleAutomation() {
+    state = { ...state, automation: { ...state.automation, enabled: !state.automation.enabled } };
+    notify();
+  },
+  logAI(entry: Omit<AIJournalEntry, "id" | "ts"> & { ts?: string }) {
+    const e: AIJournalEntry = { id: `j${Date.now()}`, ts: entry.ts ?? new Date().toISOString(), ...entry };
+    state = { ...state, aiJournal: [e, ...state.aiJournal].slice(0, 500) };
+    notify();
+  },
+  aiApproveBooking(id: string, admin = "Admin") {
+    const b = state.bookings.find(x => x.id === id);
+    if (!b) return;
+    state = {
+      ...state,
+      bookings: state.bookings.map(x => x.id === id ? {
+        ...x, status: "Confirmée", needsHumanValidation: false,
+        treatment: "Validée par un administrateur", aiValidatedBy: admin,
+        history: [...x.history, { ts: new Date().toISOString(), label: `Validée par ${admin} (analyse IA)` }],
+      } : x),
+    };
+    notify();
+    actions.logAI({
+      action: "Validation humaine acceptée", module: "Réservations",
+      clientName: b.clientName, bookingId: b.id, confidence: b.aiConfidence,
+      decision: "Confirmée", humanValidation: true, validatedBy: admin, result: "Confirmée par admin",
+    });
+  },
+  aiRejectBooking(id: string, admin = "Admin") {
+    const b = state.bookings.find(x => x.id === id);
+    if (!b) return;
+    state = {
+      ...state,
+      bookings: state.bookings.map(x => x.id === id ? {
+        ...x, status: "Refusée", needsHumanValidation: false, aiValidatedBy: admin,
+        history: [...x.history, { ts: new Date().toISOString(), label: `Refusée par ${admin}` }],
+      } : x),
+    };
+    notify();
+    actions.logAI({
+      action: "Validation humaine refusée", module: "Réservations",
+      clientName: b.clientName, bookingId: b.id, decision: "Refusée",
+      humanValidation: true, validatedBy: admin, result: "Refusée",
+    });
+  },
 };
+
+export function findAlternatives(activityId: string, excludeSlotId?: string, max = 3) {
+  const now = Date.now();
+  return state.schedule
+    .filter(s => s.active && s.activityId === activityId && s.id !== excludeSlotId && s.booked < s.capacity && new Date(s.start).getTime() > now)
+    .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+    .slice(0, max);
+}
 
 // Helpers
 export const findActivity = (id: string) => state.activities.find(a => a.id === id);

@@ -20,11 +20,15 @@ function Overview() {
   const promotions = useStore(s => s.promotions);
   const activities = useStore(s => s.activities);
   const payments = useStore(s => s.payments);
+  const journal = useStore(s => s.aiJournal);
 
   const today = new Date().toDateString();
   const todayBookings = bookings.filter(b => new Date(b.start).toDateString() === today);
   const todaySlots = schedule.filter(s => new Date(s.start).toDateString() === today);
   const pending = bookings.filter(b => b.status === "En attente");
+  const aiHandled = bookings.filter(b => b.treatment === "Confirmée par l'IA");
+  const aiQueue = bookings.filter(b => b.needsHumanValidation);
+  const autoRate = bookings.length ? Math.round((aiHandled.length / bookings.length) * 100) : 0;
   const confirmed = bookings.filter(b => b.status === "Confirmée");
   const fill = schedule.slice(0, 8).map(s => ({ n: s.id.slice(-3), pct: Math.round(s.booked / s.capacity * 100) }));
   const packMix = packs.filter(p => p.active).map(p => ({ name: p.name, value: 5 + p.sessions }));
@@ -34,12 +38,12 @@ function Overview() {
       <PageHeader title="Vue d'ensemble" subtitle={`Bienvenue Sofia · ${new Date().toLocaleDateString("fr", { weekday: "long", day: "2-digit", month: "long" })}`} />
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <Stat label="Réservations aujourd'hui" value={String(todayBookings.length)} delta={`${confirmed.length} confirmées`} />
-        <Stat label="En attente" value={String(pending.length)} delta="Action requise" />
+        <Stat label="Traitées par l'IA" value={String(aiHandled.length)} delta={`${autoRate}% de confirmation auto`} />
+        <Stat label="À valider par un humain" value={String(aiQueue.length)} delta="Action requise" />
         <Stat label="Séances aujourd'hui" value={String(todaySlots.length)} delta={`${todaySlots.reduce((a, s) => a + s.booked, 0)} places réservées`} />
         <Stat label="Clients" value={String(clients.length)} delta="Total actifs" />
         <Stat label="Taux de remplissage" value={`${Math.round(schedule.reduce((a, s) => a + s.booked / s.capacity, 0) / Math.max(1, schedule.length) * 100)}%`} delta="cette semaine" />
         <Stat label="Packs actifs" value={String(packs.filter(p => p.active).length)} delta={`${packs.length} au total`} />
-        <Stat label="Promotions actives" value={String(promotions.filter(p => p.active).length)} delta="visible côté site" />
         <Stat label="Paiements récents" value={String(payments.length)} delta={`${payments.filter(p => p.status === "Payé").reduce((a, p) => a + p.amount, 0).toLocaleString("fr")} MAD`} />
       </div>
 
@@ -124,6 +128,25 @@ function Overview() {
             ))}
             {pending.length === 0 && <div className="text-sm text-muted-foreground">Rien à valider.</div>}
           </div>
+        </div>
+      </div>
+
+      <div className="p-6 rounded-2xl bg-card border border-border">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-serif text-xl text-[color:var(--forest)]">Activité de l'Agent IA aujourd'hui</h3>
+          <Link to="/admin/ai-agent" className="text-xs text-muted-foreground hover:text-[color:var(--forest)]">Voir le journal →</Link>
+        </div>
+        <div className="space-y-2 max-h-72 overflow-y-auto">
+          {journal.slice(0, 8).map(j => (
+            <div key={j.id} className="flex items-center gap-3 p-3 rounded-lg bg-[color:var(--cream)]/60 text-sm">
+              <div className="flex-1 min-w-0">
+                <div className="font-medium truncate">{j.action} · <span className="text-muted-foreground font-normal">{j.clientName ?? "—"}</span></div>
+                <div className="text-xs text-muted-foreground">{new Date(j.ts).toLocaleString("fr")} · {j.decision}{typeof j.confidence === "number" ? ` · ${j.confidence}%` : ""}</div>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-border">{j.result}</span>
+            </div>
+          ))}
+          {journal.length === 0 && <div className="text-sm text-muted-foreground">Aucune activité IA récente.</div>}
         </div>
       </div>
     </div>

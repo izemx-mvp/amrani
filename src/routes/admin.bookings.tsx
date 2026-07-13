@@ -6,7 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
-import { Search, Plus, Check, X, Clock, CheckCircle2, XCircle, MailIcon } from "lucide-react";
+import { Search, Plus, Check, X, Clock, CheckCircle2, XCircle, MailIcon, AlertTriangle, Sparkles } from "lucide-react";
+import { TreatmentBadge } from "@/routes/admin.ai-agent";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/bookings")({ component: Page });
@@ -65,7 +66,9 @@ function Page() {
             <tr>
               <th className="p-3">#</th><th className="p-3">Client</th><th className="p-3">Activité</th>
               <th className="p-3 hidden md:table-cell">Coach</th><th className="p-3">Date</th>
-              <th className="p-3 hidden lg:table-cell">Pack</th><th className="p-3 hidden lg:table-cell">Paiement</th>
+              <th className="p-3 hidden xl:table-cell">Pack</th>
+              <th className="p-3 hidden lg:table-cell">Traitement</th>
+              <th className="p-3 hidden lg:table-cell">Confiance IA</th>
               <th className="p-3">Statut</th><th></th>
             </tr>
           </thead>
@@ -75,20 +78,24 @@ function Page() {
               const c = findCoach(b.coachId);
               const d = new Date(b.start);
               return (
-                <tr key={b.id} className="border-t border-border hover:bg-[color:var(--cream)]/50 cursor-pointer" onClick={() => setSelected(b.id)}>
+                <tr key={b.id} className={`border-t border-border hover:bg-[color:var(--cream)]/50 cursor-pointer ${b.needsHumanValidation ? "bg-amber-50/40" : ""}`} onClick={() => setSelected(b.id)}>
                   <td className="p-3 text-xs text-muted-foreground font-mono">{b.id.slice(-6)}</td>
-                  <td className="p-3 font-medium">{b.clientName}</td>
+                  <td className="p-3 font-medium">
+                    {b.clientName}
+                    {b.needsHumanValidation && <span className="ml-2 inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800"><AlertTriangle className="h-2.5 w-2.5" />À valider</span>}
+                  </td>
                   <td className="p-3">{a?.name}</td>
                   <td className="p-3 hidden md:table-cell">{c?.name}</td>
                   <td className="p-3">{d.toLocaleDateString("fr", { day: "2-digit", month: "short" })} · {d.toLocaleTimeString("fr", { hour: "2-digit", minute: "2-digit" })}</td>
-                  <td className="p-3 hidden lg:table-cell">{b.packId ? findPack(b.packId)?.name : "—"}</td>
-                  <td className="p-3 hidden lg:table-cell text-xs">{b.paymentStatus}</td>
+                  <td className="p-3 hidden xl:table-cell">{b.packId ? findPack(b.packId)?.name : "—"}</td>
+                  <td className="p-3 hidden lg:table-cell"><TreatmentBadge t={b.treatment ?? "Créée par le client"} /></td>
+                  <td className="p-3 hidden lg:table-cell text-xs">{typeof b.aiConfidence === "number" ? `${b.aiConfidence}%` : "—"}</td>
                   <td className="p-3"><StatusBadge s={b.status} /></td>
                   <td className="p-3 text-right"><Button size="sm" variant="ghost">Ouvrir</Button></td>
                 </tr>
               );
             })}
-            {filtered.length === 0 && <tr><td colSpan={9} className="p-12 text-center text-muted-foreground">Aucune réservation.</td></tr>}
+            {filtered.length === 0 && <tr><td colSpan={10} className="p-12 text-center text-muted-foreground">Aucune réservation.</td></tr>}
           </tbody>
         </table>
       </div>
@@ -151,6 +158,31 @@ function BookingSheet({ id, onClose }: { id: string | null; onClose: () => void 
               <Button size="sm" variant="outline" className="mt-3" onClick={() => { actions.markBookingPaid(b.id); toast.success("Paiement enregistré"); }}>Marquer comme payé</Button>
             )}
           </Section>
+
+          <Section title="Analyse de l'Agent IA">
+            <div className="p-4 rounded-xl bg-[color:var(--sage)]/15 border border-[color:var(--sage)]/40 space-y-2 text-sm">
+              <div className="flex items-center gap-2 text-xs">
+                <Sparkles className="h-4 w-4 text-[color:var(--forest)]" />
+                <TreatmentBadge t={b.treatment ?? "Créée par le client"} />
+                {typeof b.aiConfidence === "number" && <span className="text-muted-foreground">Confiance : <span className="font-medium text-[color:var(--forest)]">{b.aiConfidence}%</span></span>}
+              </div>
+              {b.aiAnalysis?.summary && <p><span className="text-muted-foreground text-xs">Résumé :</span> {b.aiAnalysis.summary}</p>}
+              {b.aiAnalysis?.checks && (
+                <ul className="text-xs space-y-1">
+                  {b.aiAnalysis.checks.map((k, i) => (
+                    <li key={i} className="flex items-center gap-1.5">
+                      {k.ok ? <CheckCircle2 className="h-3 w-3 text-emerald-600" /> : <XCircle className="h-3 w-3 text-red-600" />}{k.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {b.aiAnalysis?.problem && <p className="text-xs text-amber-900"><AlertTriangle className="h-3 w-3 inline mr-1" />{b.aiAnalysis.problem}</p>}
+              {b.aiAnalysis?.recommendation && <p className="text-xs"><span className="text-muted-foreground">Recommandation :</span> {b.aiAnalysis.recommendation}</p>}
+              {b.aiValidatedBy && <p className="text-xs text-muted-foreground">Validée par {b.aiValidatedBy}</p>}
+              {!b.aiAnalysis && !b.aiConfidence && <p className="text-xs text-muted-foreground">Réservation créée sans traitement IA.</p>}
+            </div>
+          </Section>
+
 
           <Section title="Suivi">
             <ol className="mt-2 space-y-2 border-l-2 border-[color:var(--sage)]/40 pl-4">
