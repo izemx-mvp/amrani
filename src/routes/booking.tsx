@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { activities, schedule, packs, findActivity, findCoach } from "@/lib/mock-data";
+import { useStore, actions, findActivity, findCoach, ensureClientByEmail } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Check, ChevronRight, Lock, CreditCard, Ticket } from "lucide-react";
