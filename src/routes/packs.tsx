@@ -10,6 +10,7 @@ export const Route = createFileRoute("/packs")({
 });
 
 function Packs() {
+  const packs = useStore(s => s.packs.filter(p => p.active));
   return (
     <PublicLayout>
       <section className="container-editorial py-16">
