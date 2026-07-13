@@ -46,6 +46,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="flex items-center gap-3">
+            <Link to="/admin/login" className="hidden md:inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-[color:var(--forest)]/30 text-[color:var(--forest)] hover:bg-[color:var(--forest)] hover:text-[color:var(--cream)] transition-colors">
+              Back Office
+            </Link>
             <Link to={isAuthenticated ? "/client" : "/auth"} className="hidden sm:inline-flex items-center gap-1.5 text-sm text-foreground/80 hover:text-[color:var(--forest)]">
               <User className="h-4 w-4" />{espaceLabel}
             </Link>
@@ -62,6 +65,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             <div className="container-editorial py-4 flex flex-col gap-3">
               {NAV.map(n => <Link key={n.to} to={n.to} className="py-1 text-foreground/80">{n.label}</Link>)}
               <Link to={isAuthenticated ? "/client" : "/auth"} className="py-1 text-foreground/80">{espaceLabel}</Link>
+              <Link to="/admin/login" className="py-1 text-foreground/80">Back Office</Link>
               <Link to="/booking"><Button className="rounded-full w-full mt-2">Réserver</Button></Link>
             </div>
           </div>

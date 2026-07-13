@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 
 const KEY = "amrani.user";
-type User = { firstName: string; lastName: string; email: string; phone?: string };
+export type Role = "client" | "admin";
+type User = { firstName: string; lastName: string; email: string; phone?: string; role: Role };
 
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach(l => l());
@@ -11,14 +12,18 @@ export function getUser(): User | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as User) : null;
+    if (!raw) return null;
+    const u = JSON.parse(raw) as User;
+    if (!u.role) u.role = "client";
+    return u;
   } catch {
     return null;
   }
 }
 
-export function signIn(u: User) {
-  localStorage.setItem(KEY, JSON.stringify(u));
+export function signIn(u: Partial<User> & { email: string; firstName: string; lastName: string }) {
+  const full: User = { role: "client", ...u } as User;
+  localStorage.setItem(KEY, JSON.stringify(full));
   emit();
 }
 
@@ -39,5 +44,5 @@ export function useAuth() {
     window.addEventListener("storage", onStorage);
     return () => { listeners.delete(cb); window.removeEventListener("storage", onStorage); };
   }, []);
-  return { user, hydrated, isAuthenticated: !!user };
+  return { user, hydrated, isAuthenticated: !!user, isAdmin: user?.role === "admin" };
 }

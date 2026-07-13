@@ -37,6 +37,7 @@ import { Route as AdminPlanningRouteImport } from './routes/admin.planning'
 import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 import { Route as AdminPacksRouteImport } from './routes/admin.packs'
 import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminKnowledgeRouteImport } from './routes/admin.knowledge'
 import { Route as AdminCreativeStudioRouteImport } from './routes/admin.creative-studio'
 import { Route as AdminCoachesRouteImport } from './routes/admin.coaches'
@@ -186,6 +187,11 @@ const AdminMessagesRoute = AdminMessagesRouteImport.update({
   path: '/messages',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminKnowledgeRoute = AdminKnowledgeRouteImport.update({
   id: '/knowledge',
   path: '/knowledge',
@@ -249,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/admin/coaches': typeof AdminCoachesRoute
   '/admin/creative-studio': typeof AdminCreativeStudioRoute
   '/admin/knowledge': typeof AdminKnowledgeRoute
+  '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/packs': typeof AdminPacksRoute
   '/admin/payments': typeof AdminPaymentsRoute
@@ -285,6 +292,7 @@ export interface FileRoutesByTo {
   '/admin/coaches': typeof AdminCoachesRoute
   '/admin/creative-studio': typeof AdminCreativeStudioRoute
   '/admin/knowledge': typeof AdminKnowledgeRoute
+  '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/packs': typeof AdminPacksRoute
   '/admin/payments': typeof AdminPaymentsRoute
@@ -324,6 +332,7 @@ export interface FileRoutesById {
   '/admin/coaches': typeof AdminCoachesRoute
   '/admin/creative-studio': typeof AdminCreativeStudioRoute
   '/admin/knowledge': typeof AdminKnowledgeRoute
+  '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/packs': typeof AdminPacksRoute
   '/admin/payments': typeof AdminPaymentsRoute
@@ -364,6 +373,7 @@ export interface FileRouteTypes {
     | '/admin/coaches'
     | '/admin/creative-studio'
     | '/admin/knowledge'
+    | '/admin/login'
     | '/admin/messages'
     | '/admin/packs'
     | '/admin/payments'
@@ -400,6 +410,7 @@ export interface FileRouteTypes {
     | '/admin/coaches'
     | '/admin/creative-studio'
     | '/admin/knowledge'
+    | '/admin/login'
     | '/admin/messages'
     | '/admin/packs'
     | '/admin/payments'
@@ -438,6 +449,7 @@ export interface FileRouteTypes {
     | '/admin/coaches'
     | '/admin/creative-studio'
     | '/admin/knowledge'
+    | '/admin/login'
     | '/admin/messages'
     | '/admin/packs'
     | '/admin/payments'
@@ -669,6 +681,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMessagesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/knowledge': {
       id: '/admin/knowledge'
       path: '/knowledge'
@@ -737,6 +756,7 @@ interface AdminRouteChildren {
   AdminCoachesRoute: typeof AdminCoachesRoute
   AdminCreativeStudioRoute: typeof AdminCreativeStudioRoute
   AdminKnowledgeRoute: typeof AdminKnowledgeRoute
+  AdminLoginRoute: typeof AdminLoginRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
   AdminPacksRoute: typeof AdminPacksRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
@@ -756,6 +776,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCoachesRoute: AdminCoachesRoute,
   AdminCreativeStudioRoute: AdminCreativeStudioRoute,
   AdminKnowledgeRoute: AdminKnowledgeRoute,
+  AdminLoginRoute: AdminLoginRoute,
   AdminMessagesRoute: AdminMessagesRoute,
   AdminPacksRoute: AdminPacksRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
