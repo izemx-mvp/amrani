@@ -109,7 +109,12 @@ function Auth() {
           </div>
         )}
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">
+        <div className="mt-6 text-center">
+          <Link to="/admin/login" className="inline-flex items-center gap-1.5 text-xs px-4 py-2 rounded-full border border-[color:var(--forest)]/30 text-[color:var(--forest)] hover:bg-[color:var(--forest)] hover:text-[color:var(--cream)] transition-colors">
+            <ShieldCheck className="h-3.5 w-3.5" /> Connexion administrateur
+          </Link>
+        </div>
+        <p className="mt-4 text-center text-xs text-muted-foreground">
           En continuant, vous acceptez nos <Link to="/contact" className="underline">conditions</Link>.
         </p>
       </section>
