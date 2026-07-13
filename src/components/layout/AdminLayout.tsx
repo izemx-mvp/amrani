@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 import { Lotus } from "@/components/brand/Logo";
 import {
   LayoutGrid, CalendarCheck, CalendarDays, Users, Activity, UserCog,
-  Package, Sparkles, FileText, MessageSquare, Bot, BookOpen, Wand2, Shield, Settings, Menu, X
+  Package, Sparkles, FileText, MessageSquare, Bot, BookOpen, Wand2, Shield, Settings, Menu, X, CreditCard, Search, Bell
 } from "lucide-react";
 
 const NAV: { to: any; label: string; icon: any; exact?: boolean }[] = [
@@ -11,16 +11,17 @@ const NAV: { to: any; label: string; icon: any; exact?: boolean }[] = [
   { to: "/admin/bookings", label: "Réservations", icon: CalendarCheck },
   { to: "/admin/planning", label: "Planning", icon: CalendarDays },
   { to: "/admin/clients", label: "Clients", icon: Users },
-  { to: "/admin/activities", label: "Activités", icon: Activity },
+  { to: "/admin/activities", label: "Catalogue & Activités", icon: Activity },
   { to: "/admin/coaches", label: "Coaches", icon: UserCog },
   { to: "/admin/packs", label: "Packs", icon: Package },
   { to: "/admin/promotions", label: "Promotions", icon: Sparkles },
   { to: "/admin/articles", label: "Articles", icon: FileText },
+  { to: "/admin/payments", label: "Paiements", icon: CreditCard },
   { to: "/admin/messages", label: "Messages", icon: MessageSquare },
   { to: "/admin/ai-agent", label: "Agent IA", icon: Bot },
   { to: "/admin/knowledge", label: "Base de connaissances", icon: BookOpen },
   { to: "/admin/creative-studio", label: "Studio Créatif IA", icon: Wand2 },
-  { to: "/admin/users", label: "Utilisateurs", icon: Shield },
+  { to: "/admin/users", label: "Utilisateurs & Rôles", icon: Shield },
   { to: "/admin/settings", label: "Configuration", icon: Settings },
 ];
 
