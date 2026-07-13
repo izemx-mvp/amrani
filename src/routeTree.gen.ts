@@ -34,6 +34,7 @@ import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminPromotionsRouteImport } from './routes/admin.promotions'
 import { Route as AdminPlanningRouteImport } from './routes/admin.planning'
+import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 import { Route as AdminPacksRouteImport } from './routes/admin.packs'
 import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
 import { Route as AdminKnowledgeRouteImport } from './routes/admin.knowledge'
@@ -170,6 +171,11 @@ const AdminPlanningRoute = AdminPlanningRouteImport.update({
   path: '/planning',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPacksRoute = AdminPacksRouteImport.update({
   id: '/packs',
   path: '/packs',
@@ -245,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/admin/knowledge': typeof AdminKnowledgeRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/packs': typeof AdminPacksRoute
+  '/admin/payments': typeof AdminPaymentsRoute
   '/admin/planning': typeof AdminPlanningRoute
   '/admin/promotions': typeof AdminPromotionsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -280,6 +287,7 @@ export interface FileRoutesByTo {
   '/admin/knowledge': typeof AdminKnowledgeRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/packs': typeof AdminPacksRoute
+  '/admin/payments': typeof AdminPaymentsRoute
   '/admin/planning': typeof AdminPlanningRoute
   '/admin/promotions': typeof AdminPromotionsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -318,6 +326,7 @@ export interface FileRoutesById {
   '/admin/knowledge': typeof AdminKnowledgeRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/packs': typeof AdminPacksRoute
+  '/admin/payments': typeof AdminPaymentsRoute
   '/admin/planning': typeof AdminPlanningRoute
   '/admin/promotions': typeof AdminPromotionsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -357,6 +366,7 @@ export interface FileRouteTypes {
     | '/admin/knowledge'
     | '/admin/messages'
     | '/admin/packs'
+    | '/admin/payments'
     | '/admin/planning'
     | '/admin/promotions'
     | '/admin/settings'
@@ -392,6 +402,7 @@ export interface FileRouteTypes {
     | '/admin/knowledge'
     | '/admin/messages'
     | '/admin/packs'
+    | '/admin/payments'
     | '/admin/planning'
     | '/admin/promotions'
     | '/admin/settings'
@@ -429,6 +440,7 @@ export interface FileRouteTypes {
     | '/admin/knowledge'
     | '/admin/messages'
     | '/admin/packs'
+    | '/admin/payments'
     | '/admin/planning'
     | '/admin/promotions'
     | '/admin/settings'
@@ -636,6 +648,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPlanningRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/payments': {
+      id: '/admin/payments'
+      path: '/payments'
+      fullPath: '/admin/payments'
+      preLoaderRoute: typeof AdminPaymentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/packs': {
       id: '/admin/packs'
       path: '/packs'
@@ -720,6 +739,7 @@ interface AdminRouteChildren {
   AdminKnowledgeRoute: typeof AdminKnowledgeRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
   AdminPacksRoute: typeof AdminPacksRoute
+  AdminPaymentsRoute: typeof AdminPaymentsRoute
   AdminPlanningRoute: typeof AdminPlanningRoute
   AdminPromotionsRoute: typeof AdminPromotionsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
@@ -738,6 +758,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminKnowledgeRoute: AdminKnowledgeRoute,
   AdminMessagesRoute: AdminMessagesRoute,
   AdminPacksRoute: AdminPacksRoute,
+  AdminPaymentsRoute: AdminPaymentsRoute,
   AdminPlanningRoute: AdminPlanningRoute,
   AdminPromotionsRoute: AdminPromotionsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
