@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { promotions } from "@/lib/mock-data";
+import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/promotions")({
@@ -9,6 +9,7 @@ export const Route = createFileRoute("/promotions")({
 });
 
 function Promotions() {
+  const promotions = useStore(s => s.promotions.filter(p => p.active));
   return (
     <PublicLayout>
       <section className="container-editorial py-16">

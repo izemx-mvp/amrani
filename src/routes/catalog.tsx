@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { activities, schedule, findCoach, coaches } from "@/lib/mock-data";
+import { useStore, findCoach, coaches } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
@@ -21,6 +21,8 @@ const CATEGORIES: string[] = ["Yoga", "Pilates"];
 const FORMATS: string[] = ["Collectif", "Individuel"];
 
 function Catalog() {
+  const activities = useStore(s => s.activities.filter(a => a.active));
+  const schedule = useStore(s => s.schedule.filter(s => s.active));
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string | null>(null);
   const [format, setFormat] = useState<string | null>(null);

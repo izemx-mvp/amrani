@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { packs } from "@/lib/mock-data";
+import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Check, Star } from "lucide-react";
 
@@ -10,6 +10,7 @@ export const Route = createFileRoute("/packs")({
 });
 
 function Packs() {
+  const packs = useStore(s => s.packs.filter(p => p.active));
   return (
     <PublicLayout>
       <section className="container-editorial py-16">

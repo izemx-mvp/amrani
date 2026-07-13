@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 import { Lotus } from "@/components/brand/Logo";
 import {
   LayoutGrid, CalendarCheck, CalendarDays, Users, Activity, UserCog,
-  Package, Sparkles, FileText, MessageSquare, Bot, BookOpen, Wand2, Shield, Settings, Menu, X
+  Package, Sparkles, FileText, MessageSquare, Bot, BookOpen, Wand2, Shield, Settings, Menu, X, CreditCard, Search, Bell
 } from "lucide-react";
 
 const NAV: { to: any; label: string; icon: any; exact?: boolean }[] = [
@@ -11,16 +11,17 @@ const NAV: { to: any; label: string; icon: any; exact?: boolean }[] = [
   { to: "/admin/bookings", label: "Réservations", icon: CalendarCheck },
   { to: "/admin/planning", label: "Planning", icon: CalendarDays },
   { to: "/admin/clients", label: "Clients", icon: Users },
-  { to: "/admin/activities", label: "Activités", icon: Activity },
+  { to: "/admin/activities", label: "Catalogue & Activités", icon: Activity },
   { to: "/admin/coaches", label: "Coaches", icon: UserCog },
   { to: "/admin/packs", label: "Packs", icon: Package },
   { to: "/admin/promotions", label: "Promotions", icon: Sparkles },
   { to: "/admin/articles", label: "Articles", icon: FileText },
+  { to: "/admin/payments", label: "Paiements", icon: CreditCard },
   { to: "/admin/messages", label: "Messages", icon: MessageSquare },
   { to: "/admin/ai-agent", label: "Agent IA", icon: Bot },
   { to: "/admin/knowledge", label: "Base de connaissances", icon: BookOpen },
   { to: "/admin/creative-studio", label: "Studio Créatif IA", icon: Wand2 },
-  { to: "/admin/users", label: "Utilisateurs", icon: Shield },
+  { to: "/admin/users", label: "Utilisateurs & Rôles", icon: Shield },
   { to: "/admin/settings", label: "Configuration", icon: Settings },
 ];
 
@@ -54,13 +55,21 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         </aside>
         <div className="flex-1 min-w-0">
           <header className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-border">
-            <div className="flex items-center justify-between px-6 py-3">
+            <div className="flex items-center gap-3 px-4 lg:px-6 py-3">
               <button className="lg:hidden p-2" onClick={() => setOpen(v => !v)}>
                 {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
-              <div className="flex-1" />
-              <div className="flex items-center gap-4 text-sm">
-                <Link to="/" className="text-muted-foreground hover:text-[color:var(--forest)]">Voir le site</Link>
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input placeholder="Recherche globale…" className="w-full h-9 pl-9 pr-3 text-sm rounded-full bg-secondary/60 border border-transparent focus:bg-white focus:border-border focus:outline-none" />
+              </div>
+              <div className="flex items-center gap-3 text-sm">
+                <Link to="/admin/bookings" className="hidden md:inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-[color:var(--forest)] text-[color:var(--cream)] hover:opacity-90">+ Réservation</Link>
+                <button className="relative p-2 rounded-full hover:bg-secondary" aria-label="Notifications">
+                  <Bell className="h-4 w-4 text-[color:var(--forest)]" />
+                  <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[color:var(--forest)]" />
+                </button>
+                <Link to="/" className="hidden sm:inline text-muted-foreground hover:text-[color:var(--forest)]">Voir le site</Link>
                 <div className="h-8 w-8 rounded-full bg-[color:var(--sage)] text-[color:var(--forest)] grid place-items-center text-xs font-semibold">SA</div>
               </div>
             </div>

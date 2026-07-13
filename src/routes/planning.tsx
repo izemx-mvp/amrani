@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { schedule, findActivity, findCoach } from "@/lib/mock-data";
+import { useStore, findActivity, findCoach } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { useMemo, useState } from "react";
 
@@ -13,6 +13,7 @@ const FILTERS = ["Tous", "Yoga", "Pilates", "Débutant", "Intermédiaire", "Avan
 const VIEWS = ["Aujourd'hui", "Semaine", "Liste"] as const;
 
 function Planning() {
+  const schedule = useStore(s => s.schedule.filter(s => s.active));
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("Tous");
   const [view, setView] = useState<(typeof VIEWS)[number]>("Semaine");
 

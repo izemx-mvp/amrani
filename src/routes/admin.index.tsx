@@ -1,30 +1,46 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageHeader } from "@/components/layout/AdminLayout";
-import { bookings, clients, schedule, packs, promotions, activities } from "@/lib/mock-data";
+import { useStore, findActivity, findCoach } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, BarChart, Bar } from "recharts";
 import { Plus, Calendar, Package, Sparkles, FileText, Wand2 } from "lucide-react";
+import { actions } from "@/lib/store";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/")({ component: Overview });
 
 const trend = Array.from({ length: 12 }).map((_, i) => ({ m: ["Jan","Fev","Mar","Avr","Mai","Jun","Jul","Aou","Sep","Oct","Nov","Déc"][i], v: 40 + Math.round(Math.sin(i) * 15 + i * 2) }));
-const fill = schedule.map(s => ({ n: s.id.slice(1), pct: Math.round(s.booked / s.capacity * 100) }));
-const packMix = packs.map(p => ({ name: p.name, value: 5 + p.sessions }));
 const COLORS = ["#17352C", "#A8B5A2", "#E9E0D2", "#202420", "#7C9483"];
 
 function Overview() {
+  const bookings = useStore(s => s.bookings);
+  const clients = useStore(s => s.clients);
+  const schedule = useStore(s => s.schedule);
+  const packs = useStore(s => s.packs);
+  const promotions = useStore(s => s.promotions);
+  const activities = useStore(s => s.activities);
+  const payments = useStore(s => s.payments);
+
+  const today = new Date().toDateString();
+  const todayBookings = bookings.filter(b => new Date(b.start).toDateString() === today);
+  const todaySlots = schedule.filter(s => new Date(s.start).toDateString() === today);
+  const pending = bookings.filter(b => b.status === "En attente");
+  const confirmed = bookings.filter(b => b.status === "Confirmée");
+  const fill = schedule.slice(0, 8).map(s => ({ n: s.id.slice(-3), pct: Math.round(s.booked / s.capacity * 100) }));
+  const packMix = packs.filter(p => p.active).map(p => ({ name: p.name, value: 5 + p.sessions }));
+
   return (
     <div className="space-y-8">
-      <PageHeader title="Vue d'ensemble" subtitle="Bienvenue Sofia · Aujourd'hui" />
+      <PageHeader title="Vue d'ensemble" subtitle={`Bienvenue Sofia · ${new Date().toLocaleDateString("fr", { weekday: "long", day: "2-digit", month: "long" })}`} />
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <Stat label="Réservations aujourd'hui" value="14" delta="+3" />
-        <Stat label="En attente" value="5" delta="Action requise" />
-        <Stat label="Séances aujourd'hui" value="6" delta="4 salles" />
-        <Stat label="Nouveaux clients (7j)" value="8" delta="+22%" />
-        <Stat label="Taux de remplissage" value="78%" delta="cette semaine" />
-        <Stat label="Packs actifs" value={String(clients.length)} delta="+4 ce mois" />
-        <Stat label="Packs expirants" value="3" delta="< 15 jours" />
-        <Stat label="Promotions actives" value={String(promotions.length)} delta="en cours" />
+        <Stat label="Réservations aujourd'hui" value={String(todayBookings.length)} delta={`${confirmed.length} confirmées`} />
+        <Stat label="En attente" value={String(pending.length)} delta="Action requise" />
+        <Stat label="Séances aujourd'hui" value={String(todaySlots.length)} delta={`${todaySlots.reduce((a, s) => a + s.booked, 0)} places réservées`} />
+        <Stat label="Clients" value={String(clients.length)} delta="Total actifs" />
+        <Stat label="Taux de remplissage" value={`${Math.round(schedule.reduce((a, s) => a + s.booked / s.capacity, 0) / Math.max(1, schedule.length) * 100)}%`} delta="cette semaine" />
+        <Stat label="Packs actifs" value={String(packs.filter(p => p.active).length)} delta={`${packs.length} au total`} />
+        <Stat label="Promotions actives" value={String(promotions.filter(p => p.active).length)} delta="visible côté site" />
+        <Stat label="Paiements récents" value={String(payments.length)} delta={`${payments.filter(p => p.status === "Payé").reduce((a, p) => a + p.amount, 0).toLocaleString("fr")} MAD`} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -61,7 +77,7 @@ function Overview() {
         <div className="grid gap-3 grid-cols-2 md:grid-cols-6">
           {[
             { to: "/admin/planning", icon: Calendar, label: "Ajouter un cours" },
-            { to: "/admin/bookings", icon: Plus, label: "Ajouter réservation" },
+            { to: "/admin/bookings", icon: Plus, label: "Nouvelle réservation" },
             { to: "/admin/packs", icon: Package, label: "Créer un pack" },
             { to: "/admin/promotions", icon: Sparkles, label: "Créer promotion" },
             { to: "/admin/articles", icon: FileText, label: "Publier article" },
@@ -74,19 +90,40 @@ function Overview() {
         </div>
       </div>
 
-      <div className="p-6 rounded-2xl bg-card border border-border">
-        <h3 className="font-serif text-xl text-[color:var(--forest)] mb-4">Réservations à valider</h3>
-        <div className="space-y-2">
-          {bookings.filter(b => b.status === "En attente").slice(0, 5).map(b => (
-            <div key={b.id} className="flex flex-wrap items-center gap-4 p-3 rounded-lg bg-[color:var(--cream)]">
-              <div className="flex-1 min-w-0">
-                <div className="font-medium">{b.clientName}</div>
-                <div className="text-xs text-muted-foreground">{new Date(b.start).toLocaleString("fr")}</div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="p-6 rounded-2xl bg-card border border-border">
+          <h3 className="font-serif text-xl text-[color:var(--forest)] mb-4">Aujourd'hui · Cours prévus</h3>
+          <div className="space-y-2">
+            {todaySlots.length === 0 && <div className="text-sm text-muted-foreground">Aucun cours prévu aujourd'hui.</div>}
+            {todaySlots.map(s => {
+              const a = findActivity(s.activityId); const c = findCoach(s.coachId);
+              return (
+                <div key={s.id} className="flex items-center justify-between p-3 rounded-lg bg-[color:var(--cream)]">
+                  <div>
+                    <div className="font-medium text-sm">{a?.name} · {new Date(s.start).toLocaleTimeString("fr", { hour: "2-digit", minute: "2-digit" })}</div>
+                    <div className="text-xs text-muted-foreground">{c?.name} · {s.booked}/{s.capacity}</div>
+                  </div>
+                  <span className="text-xs px-2 py-1 rounded-full bg-white">{s.capacity - s.booked} places</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="p-6 rounded-2xl bg-card border border-border">
+          <h3 className="font-serif text-xl text-[color:var(--forest)] mb-4">Réservations à valider ({pending.length})</h3>
+          <div className="space-y-2 max-h-72 overflow-y-auto">
+            {pending.slice(0, 8).map(b => (
+              <div key={b.id} className="flex flex-wrap items-center gap-3 p-3 rounded-lg bg-[color:var(--cream)]">
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium truncate">{b.clientName}</div>
+                  <div className="text-xs text-muted-foreground">{new Date(b.start).toLocaleString("fr")}</div>
+                </div>
+                <Button size="sm" onClick={() => { actions.updateBookingStatus(b.id, "Confirmée"); toast.success("Réservation validée"); }}>Valider</Button>
+                <Button size="sm" variant="outline" onClick={() => { actions.updateBookingStatus(b.id, "Refusée"); toast.success("Refusée"); }}>Refuser</Button>
               </div>
-              <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-800">{b.status}</span>
-              <Link to="/admin/bookings"><Button size="sm">Ouvrir</Button></Link>
-            </div>
-          ))}
+            ))}
+            {pending.length === 0 && <div className="text-sm text-muted-foreground">Rien à valider.</div>}
+          </div>
         </div>
       </div>
     </div>
