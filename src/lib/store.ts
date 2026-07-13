@@ -377,7 +377,65 @@ export const actions = {
     state = { ...state, payments: state.payments.map(p => p.id === id ? { ...p, status } : p) };
     notify();
   },
+
+  // AI Agent
+  setAutomationMode(mode: AutomationMode) {
+    state = { ...state, automation: { ...state.automation, mode } };
+    notify();
+  },
+  toggleAutomation() {
+    state = { ...state, automation: { ...state.automation, enabled: !state.automation.enabled } };
+    notify();
+  },
+  logAI(entry: Omit<AIJournalEntry, "id" | "ts"> & { ts?: string }) {
+    const e: AIJournalEntry = { id: `j${Date.now()}`, ts: entry.ts ?? new Date().toISOString(), ...entry };
+    state = { ...state, aiJournal: [e, ...state.aiJournal].slice(0, 500) };
+    notify();
+  },
+  aiApproveBooking(id: string, admin = "Admin") {
+    const b = state.bookings.find(x => x.id === id);
+    if (!b) return;
+    state = {
+      ...state,
+      bookings: state.bookings.map(x => x.id === id ? {
+        ...x, status: "Confirmée", needsHumanValidation: false,
+        treatment: "Validée par un administrateur", aiValidatedBy: admin,
+        history: [...x.history, { ts: new Date().toISOString(), label: `Validée par ${admin} (analyse IA)` }],
+      } : x),
+    };
+    notify();
+    actions.logAI({
+      action: "Validation humaine acceptée", module: "Réservations",
+      clientName: b.clientName, bookingId: b.id, confidence: b.aiConfidence,
+      decision: "Confirmée", humanValidation: true, validatedBy: admin, result: "Confirmée par admin",
+    });
+  },
+  aiRejectBooking(id: string, admin = "Admin") {
+    const b = state.bookings.find(x => x.id === id);
+    if (!b) return;
+    state = {
+      ...state,
+      bookings: state.bookings.map(x => x.id === id ? {
+        ...x, status: "Refusée", needsHumanValidation: false, aiValidatedBy: admin,
+        history: [...x.history, { ts: new Date().toISOString(), label: `Refusée par ${admin}` }],
+      } : x),
+    };
+    notify();
+    actions.logAI({
+      action: "Validation humaine refusée", module: "Réservations",
+      clientName: b.clientName, bookingId: b.id, decision: "Refusée",
+      humanValidation: true, validatedBy: admin, result: "Refusée",
+    });
+  },
 };
+
+export function findAlternatives(activityId: string, excludeSlotId?: string, max = 3) {
+  const now = Date.now();
+  return state.schedule
+    .filter(s => s.active && s.activityId === activityId && s.id !== excludeSlotId && s.booked < s.capacity && new Date(s.start).getTime() > now)
+    .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+    .slice(0, max);
+}
 
 // Helpers
 export const findActivity = (id: string) => state.activities.find(a => a.id === id);
