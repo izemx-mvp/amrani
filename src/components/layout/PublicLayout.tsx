@@ -2,15 +2,18 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Instagram, Facebook } from "lucide-react";
+import { Menu, X, Instagram, Facebook, User } from "lucide-react";
 import { AIBubble } from "@/components/ai/AIBubble";
+import { useAuth } from "@/lib/auth";
 
 const NAV = [
   { to: "/", label: "Accueil" },
   { to: "/about", label: "À propos" },
   { to: "/activities", label: "Activités" },
+  { to: "/catalog", label: "Catalogue" },
   { to: "/planning", label: "Planning" },
   { to: "/packs", label: "Packs" },
+  { to: "/promotions", label: "Promotions" },
   { to: "/blog", label: "Blog" },
   { to: "/contact", label: "Contact" },
 ] as const;
@@ -19,6 +22,8 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: s => s.location.pathname });
+  const { user, isAuthenticated } = useAuth();
+  const espaceLabel = isAuthenticated && user ? user.firstName : "Mon espace";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -33,7 +38,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       <header className={`fixed top-0 inset-x-0 z-40 transition-all duration-300 ${scrolled ? "bg-background/90 backdrop-blur-md border-b border-border py-2" : "bg-transparent py-4"}`}>
         <div className="container-editorial flex items-center justify-between">
           <Logo />
-          <nav className="hidden lg:flex items-center gap-7">
+          <nav className="hidden lg:flex items-center gap-5">
             {NAV.map(n => (
               <Link key={n.to} to={n.to} className="text-sm text-foreground/80 hover:text-[color:var(--forest)] transition-colors [&.active]:text-[color:var(--forest)] [&.active]:font-medium" activeProps={{ className: "active" }}>
                 {n.label}
@@ -41,7 +46,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            <Link to="/client" className="hidden sm:inline text-sm text-foreground/80 hover:text-[color:var(--forest)]">Mon espace</Link>
+            <Link to={isAuthenticated ? "/client" : "/auth"} className="hidden sm:inline-flex items-center gap-1.5 text-sm text-foreground/80 hover:text-[color:var(--forest)]">
+              <User className="h-4 w-4" />{espaceLabel}
+            </Link>
             <Link to="/booking">
               <Button size="sm" className="rounded-full px-5 hidden sm:inline-flex">Réserver</Button>
             </Link>
@@ -54,7 +61,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           <div className="lg:hidden border-t border-border bg-background/95 backdrop-blur-md">
             <div className="container-editorial py-4 flex flex-col gap-3">
               {NAV.map(n => <Link key={n.to} to={n.to} className="py-1 text-foreground/80">{n.label}</Link>)}
-              <Link to="/client" className="py-1 text-foreground/80">Mon espace</Link>
+              <Link to={isAuthenticated ? "/client" : "/auth"} className="py-1 text-foreground/80">{espaceLabel}</Link>
               <Link to="/booking"><Button className="rounded-full w-full mt-2">Réserver</Button></Link>
             </div>
           </div>
