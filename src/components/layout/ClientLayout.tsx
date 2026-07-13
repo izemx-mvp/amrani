@@ -3,13 +3,13 @@ import { useState, type ReactNode } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { LayoutDashboard, Calendar, Package, Bell, User, LogOut, Menu, X } from "lucide-react";
 
-const NAV = [
+const NAV: { to: any; label: string; icon: any; exact?: boolean }[] = [
   { to: "/client", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
   { to: "/client/bookings", label: "Mes réservations", icon: Calendar },
   { to: "/client/packs", label: "Mes packs", icon: Package },
   { to: "/client/notifications", label: "Notifications", icon: Bell },
   { to: "/client/profile", label: "Mon profil", icon: User },
-] as const;
+];
 
 export function ClientLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);

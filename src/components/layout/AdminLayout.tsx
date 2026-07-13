@@ -6,7 +6,7 @@ import {
   Package, Sparkles, FileText, MessageSquare, Bot, BookOpen, Wand2, Shield, Settings, Menu, X
 } from "lucide-react";
 
-const NAV = [
+const NAV: { to: any; label: string; icon: any; exact?: boolean }[] = [
   { to: "/admin", label: "Vue d'ensemble", icon: LayoutGrid, exact: true },
   { to: "/admin/bookings", label: "Réservations", icon: CalendarCheck },
   { to: "/admin/planning", label: "Planning", icon: CalendarDays },
@@ -22,7 +22,7 @@ const NAV = [
   { to: "/admin/creative-studio", label: "Studio Créatif IA", icon: Wand2 },
   { to: "/admin/users", label: "Utilisateurs", icon: Shield },
   { to: "/admin/settings", label: "Configuration", icon: Settings },
-] as const;
+];
 
 export function AdminLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
