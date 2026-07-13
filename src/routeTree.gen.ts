@@ -13,12 +13,18 @@ import { Route as PromotionsRouteImport } from './routes/promotions'
 import { Route as PlanningRouteImport } from './routes/planning'
 import { Route as PacksRouteImport } from './routes/packs'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ClientRouteImport } from './routes/client'
 import { Route as BookingRouteImport } from './routes/booking'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ActivitiesRouteImport } from './routes/activities'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ClientIndexRouteImport } from './routes/client.index'
+import { Route as ClientProfileRouteImport } from './routes/client.profile'
+import { Route as ClientPacksRouteImport } from './routes/client.packs'
+import { Route as ClientNotificationsRouteImport } from './routes/client.notifications'
+import { Route as ClientBookingsRouteImport } from './routes/client.bookings'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 
 const PromotionsRoute = PromotionsRouteImport.update({
@@ -39,6 +45,11 @@ const PacksRoute = PacksRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientRoute = ClientRouteImport.update({
+  id: '/client',
+  path: '/client',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookingRoute = BookingRouteImport.update({
@@ -71,6 +82,31 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClientIndexRoute = ClientIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientProfileRoute = ClientProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientPacksRoute = ClientPacksRouteImport.update({
+  id: '/packs',
+  path: '/packs',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientNotificationsRoute = ClientNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientBookingsRoute = ClientBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => ClientRoute,
+} as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -84,11 +120,17 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
   '/booking': typeof BookingRoute
+  '/client': typeof ClientRouteWithChildren
   '/contact': typeof ContactRoute
   '/packs': typeof PacksRoute
   '/planning': typeof PlanningRoute
   '/promotions': typeof PromotionsRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/client/bookings': typeof ClientBookingsRoute
+  '/client/notifications': typeof ClientNotificationsRoute
+  '/client/packs': typeof ClientPacksRoute
+  '/client/profile': typeof ClientProfileRoute
+  '/client/': typeof ClientIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -102,6 +144,11 @@ export interface FileRoutesByTo {
   '/planning': typeof PlanningRoute
   '/promotions': typeof PromotionsRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/client/bookings': typeof ClientBookingsRoute
+  '/client/notifications': typeof ClientNotificationsRoute
+  '/client/packs': typeof ClientPacksRoute
+  '/client/profile': typeof ClientProfileRoute
+  '/client': typeof ClientIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -111,11 +158,17 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
   '/booking': typeof BookingRoute
+  '/client': typeof ClientRouteWithChildren
   '/contact': typeof ContactRoute
   '/packs': typeof PacksRoute
   '/planning': typeof PlanningRoute
   '/promotions': typeof PromotionsRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/client/bookings': typeof ClientBookingsRoute
+  '/client/notifications': typeof ClientNotificationsRoute
+  '/client/packs': typeof ClientPacksRoute
+  '/client/profile': typeof ClientProfileRoute
+  '/client/': typeof ClientIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -126,11 +179,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/blog'
     | '/booking'
+    | '/client'
     | '/contact'
     | '/packs'
     | '/planning'
     | '/promotions'
     | '/blog/$slug'
+    | '/client/bookings'
+    | '/client/notifications'
+    | '/client/packs'
+    | '/client/profile'
+    | '/client/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -144,6 +203,11 @@ export interface FileRouteTypes {
     | '/planning'
     | '/promotions'
     | '/blog/$slug'
+    | '/client/bookings'
+    | '/client/notifications'
+    | '/client/packs'
+    | '/client/profile'
+    | '/client'
   id:
     | '__root__'
     | '/'
@@ -152,11 +216,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/blog'
     | '/booking'
+    | '/client'
     | '/contact'
     | '/packs'
     | '/planning'
     | '/promotions'
     | '/blog/$slug'
+    | '/client/bookings'
+    | '/client/notifications'
+    | '/client/packs'
+    | '/client/profile'
+    | '/client/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -166,6 +236,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BlogRoute: typeof BlogRouteWithChildren
   BookingRoute: typeof BookingRoute
+  ClientRoute: typeof ClientRouteWithChildren
   ContactRoute: typeof ContactRoute
   PacksRoute: typeof PacksRoute
   PlanningRoute: typeof PlanningRoute
@@ -200,6 +271,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/client': {
+      id: '/client'
+      path: '/client'
+      fullPath: '/client'
+      preLoaderRoute: typeof ClientRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/booking': {
@@ -244,6 +322,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/client/': {
+      id: '/client/'
+      path: '/'
+      fullPath: '/client/'
+      preLoaderRoute: typeof ClientIndexRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/profile': {
+      id: '/client/profile'
+      path: '/profile'
+      fullPath: '/client/profile'
+      preLoaderRoute: typeof ClientProfileRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/packs': {
+      id: '/client/packs'
+      path: '/packs'
+      fullPath: '/client/packs'
+      preLoaderRoute: typeof ClientPacksRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/notifications': {
+      id: '/client/notifications'
+      path: '/notifications'
+      fullPath: '/client/notifications'
+      preLoaderRoute: typeof ClientNotificationsRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/bookings': {
+      id: '/client/bookings'
+      path: '/bookings'
+      fullPath: '/client/bookings'
+      preLoaderRoute: typeof ClientBookingsRouteImport
+      parentRoute: typeof ClientRoute
+    }
     '/blog/$slug': {
       id: '/blog/$slug'
       path: '/$slug'
@@ -264,6 +377,25 @@ const BlogRouteChildren: BlogRouteChildren = {
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
+interface ClientRouteChildren {
+  ClientBookingsRoute: typeof ClientBookingsRoute
+  ClientNotificationsRoute: typeof ClientNotificationsRoute
+  ClientPacksRoute: typeof ClientPacksRoute
+  ClientProfileRoute: typeof ClientProfileRoute
+  ClientIndexRoute: typeof ClientIndexRoute
+}
+
+const ClientRouteChildren: ClientRouteChildren = {
+  ClientBookingsRoute: ClientBookingsRoute,
+  ClientNotificationsRoute: ClientNotificationsRoute,
+  ClientPacksRoute: ClientPacksRoute,
+  ClientProfileRoute: ClientProfileRoute,
+  ClientIndexRoute: ClientIndexRoute,
+}
+
+const ClientRouteWithChildren =
+  ClientRoute._addFileChildren(ClientRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -271,6 +403,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BlogRoute: BlogRouteWithChildren,
   BookingRoute: BookingRoute,
+  ClientRoute: ClientRouteWithChildren,
   ContactRoute: ContactRoute,
   PacksRoute: PacksRoute,
   PlanningRoute: PlanningRoute,
