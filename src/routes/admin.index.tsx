@@ -130,6 +130,26 @@ function Overview() {
           </div>
         </div>
       </div>
+
+      <div className="p-6 rounded-2xl bg-card border border-border">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-serif text-xl text-[color:var(--forest)]">Activité de l'Agent IA aujourd'hui</h3>
+          <Link to="/admin/ai-agent" className="text-xs text-muted-foreground hover:text-[color:var(--forest)]">Voir le journal →</Link>
+        </div>
+        <div className="space-y-2 max-h-72 overflow-y-auto">
+          {journal.slice(0, 8).map(j => (
+            <div key={j.id} className="flex items-center gap-3 p-3 rounded-lg bg-[color:var(--cream)]/60 text-sm">
+              <div className="flex-1 min-w-0">
+                <div className="font-medium truncate">{j.action} · <span className="text-muted-foreground font-normal">{j.clientName ?? "—"}</span></div>
+                <div className="text-xs text-muted-foreground">{new Date(j.ts).toLocaleString("fr")} · {j.decision}{typeof j.confidence === "number" ? ` · ${j.confidence}%` : ""}</div>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-border">{j.result}</span>
+            </div>
+          ))}
+          {journal.length === 0 && <div className="text-sm text-muted-foreground">Aucune activité IA récente.</div>}
+        </div>
+      </div>
+    </div>
     </div>
   );
 }
