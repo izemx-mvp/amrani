@@ -115,11 +115,80 @@ type State = {
   clients: Client[];
   bookings: Booking[];
   payments: Payment[];
+  automation: { mode: AutomationMode; enabled: boolean };
+  aiJournal: AIJournalEntry[];
 };
 
-const KEY = "amrani.store.v3";
+const KEY = "amrani.store.v5";
 
 function seed(): State {
+  const bookings = seedBookings.map((b, i) => {
+    const status = b.status as BookingStatus;
+    const isConfirmed = status === "Confirmée" || status === "Terminée";
+    const isPending = status === "En attente";
+    // Enrich with AI treatment metadata for demo purposes.
+    let treatment: BookingTreatment = "Créée par le client";
+    let confidence: number | undefined;
+    let needsHuman = false;
+    let analysis: AIAnalysis | undefined;
+    if (isConfirmed && i % 3 !== 0) {
+      treatment = "Confirmée par l'IA";
+      confidence = 85 + (i * 7) % 14;
+    } else if (isPending) {
+      needsHuman = i % 2 === 0;
+      treatment = needsHuman ? "En attente de validation humaine" : "Analysée par l'IA";
+      confidence = needsHuman ? 45 + (i * 11) % 25 : 70 + (i * 5) % 15;
+      if (needsHuman) {
+        const problems = [
+          "Pack expiré — paiement requis",
+          "Cours complet — surbooking possible",
+          "Coach demandé indisponible",
+          "Paiement en attente",
+          "Créneau hors politique d'annulation",
+        ];
+        analysis = {
+          summary: `Le client ${b.clientName} demande cette séance via ${["site web", "WhatsApp", "application"][i % 3]}.`,
+          checks: [
+            { label: "Cours actif", ok: true },
+            { label: "Coach disponible", ok: i % 3 !== 0 },
+            { label: "Places restantes", ok: i % 4 !== 0 },
+            { label: "Pack compatible", ok: false },
+            { label: "Paiement à jour", ok: false },
+          ],
+          availability: i % 4 === 0 ? "Créneau complet" : "Créneau disponible",
+          alternatives: [],
+          risks: ["Nécessite validation humaine"],
+          recommendation: "Contacter le client pour confirmer le mode de paiement avant validation.",
+          problem: problems[i % problems.length],
+        };
+      }
+    }
+    return {
+      ...b,
+      clientEmail: seedClients.find(c => c.id === b.clientId)?.email,
+      status,
+      source: (["Site web", "Application", "WhatsApp", "Téléphone"] as BookingSource[])[i % 4],
+      paymentStatus: (isConfirmed ? "Payé" : "En attente") as PaymentStatus,
+      paymentMode: "Pack" as PaymentMode,
+      amount: 150,
+      history: [{ ts: b.createdAt, label: "Réservation créée" }],
+      treatment, aiConfidence: confidence, needsHumanValidation: needsHuman, aiAnalysis: analysis,
+    };
+  });
+
+  const journal: AIJournalEntry[] = bookings.slice(0, 18).map((b, i) => ({
+    id: `j${i + 1}`,
+    ts: new Date(Date.now() - i * 3600 * 1000).toISOString(),
+    action: b.needsHumanValidation ? "Validation humaine demandée" : (b.treatment === "Confirmée par l'IA" ? "Réservation confirmée" : "Disponibilité vérifiée"),
+    module: "Réservations",
+    clientName: b.clientName,
+    bookingId: b.id,
+    confidence: b.aiConfidence,
+    decision: b.needsHumanValidation ? "En attente" : "Automatique",
+    humanValidation: b.needsHumanValidation,
+    result: b.needsHumanValidation ? "Envoyée en file d'attente" : "Succès",
+  }));
+
   return {
     activities: seedActivities.map(a => ({ ...a, price: 150, active: true })),
     schedule: seedSchedule.map(s => ({ ...s, room: "Salle A", active: true })),
@@ -128,26 +197,15 @@ function seed(): State {
       ...p, type: "Pourcentage" as const, value: 20, active: true, uses: Math.floor(Math.random() * 30),
     })),
     clients: seedClients.map(c => ({ ...c, createdAt: new Date(Date.now() - Math.random() * 1e10).toISOString(), notes: "" })),
-    bookings: seedBookings.map(b => ({
-      ...b,
-      clientEmail: seedClients.find(c => c.id === b.clientId)?.email,
-      status: b.status as BookingStatus,
-      source: "Site web" as BookingSource,
-      paymentStatus: (b.status === "Confirmée" || b.status === "Terminée") ? "Payé" : "En attente" as PaymentStatus,
-      paymentMode: "Pack" as PaymentMode,
-      amount: 150,
-      history: [{ ts: b.createdAt, label: "Réservation créée" }],
-    })),
+    bookings,
     payments: seedBookings.slice(0, 12).map((b, i) => ({
-      id: `p${i + 1}`,
-      clientId: b.clientId,
-      clientName: b.clientName,
-      bookingId: b.id,
-      amount: 150,
+      id: `p${i + 1}`, clientId: b.clientId, clientName: b.clientName, bookingId: b.id, amount: 150,
       mode: (["Carte bancaire", "Espèces", "En ligne", "Pack"] as PaymentMode[])[i % 4],
       status: (["Payé", "Payé", "En attente", "Payé"] as PaymentStatus[])[i % 4],
       date: new Date(Date.now() - i * 86400000).toISOString(),
     })),
+    automation: { mode: "semi", enabled: true },
+    aiJournal: journal,
   };
 }
 
