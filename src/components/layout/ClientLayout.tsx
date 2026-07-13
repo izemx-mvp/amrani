@@ -1,7 +1,8 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { LayoutDashboard, Calendar, Package, Bell, User, LogOut, Menu, X } from "lucide-react";
+import { signOut, useAuth } from "@/lib/auth";
 
 const NAV: { to: any; label: string; icon: any; exact?: boolean }[] = [
   { to: "/client", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
@@ -14,6 +15,9 @@ const NAV: { to: any; label: string; icon: any; exact?: boolean }[] = [
 export function ClientLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: s => s.location.pathname });
+  const { user } = useAuth();
+  const nav = useNavigate();
+  const handleSignOut = () => { signOut(); nav({ to: "/" }); };
 
   return (
     <div className="min-h-screen bg-background">
@@ -21,7 +25,7 @@ export function ClientLayout({ children }: { children: ReactNode }) {
         <div className="container-editorial flex items-center justify-between py-3">
           <Logo />
           <div className="flex items-center gap-4">
-            <span className="hidden sm:inline text-sm text-muted-foreground">Bonjour, Nour</span>
+            <span className="hidden sm:inline text-sm text-muted-foreground">Bonjour, {user?.firstName ?? "invité·e"}</span>
             <Link to="/" className="text-sm text-muted-foreground hover:text-[color:var(--forest)]">Site public</Link>
             <button onClick={() => setOpen(v => !v)} className="lg:hidden p-2">
               {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -41,9 +45,9 @@ export function ClientLayout({ children }: { children: ReactNode }) {
                 </Link>
               );
             })}
-            <Link to="/" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-secondary mt-6">
+            <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-secondary mt-6">
               <LogOut className="h-4 w-4" />Se déconnecter
-            </Link>
+            </button>
           </nav>
         </aside>
         <div className="min-w-0">{children}</div>
