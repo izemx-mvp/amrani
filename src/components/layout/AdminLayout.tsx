@@ -1,58 +1,166 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Lotus } from "@/components/brand/Logo";
 import {
-  LayoutGrid, CalendarCheck, CalendarDays, Users, Activity, UserCog,
-  Package, Sparkles, FileText, MessageSquare, Bot, BookOpen, Wand2, Shield, Settings, Menu, X, CreditCard, Search, Bell
+  LayoutGrid, CalendarCheck, CalendarDays, Users, Activity as ActivityIcon, UserCog,
+  Package, Sparkles, FileText, MessageSquare, Bot, BookOpen, Wand2, Shield, Settings, Menu, X,
+  CreditCard, Search, Bell, ChevronDown, ChevronRight, LogOut, ExternalLink, UserCircle,
 } from "lucide-react";
+import { signOut, useAuth } from "@/lib/auth";
+import { useStore } from "@/lib/store";
 
-const NAV: { to: any; label: string; icon: any; exact?: boolean }[] = [
-  { to: "/admin", label: "Vue d'ensemble", icon: LayoutGrid, exact: true },
-  { to: "/admin/bookings", label: "Réservations", icon: CalendarCheck },
-  { to: "/admin/planning", label: "Planning", icon: CalendarDays },
-  { to: "/admin/clients", label: "Clients", icon: Users },
-  { to: "/admin/activities", label: "Catalogue & Activités", icon: Activity },
-  { to: "/admin/coaches", label: "Coaches", icon: UserCog },
-  { to: "/admin/packs", label: "Packs", icon: Package },
-  { to: "/admin/promotions", label: "Promotions", icon: Sparkles },
-  { to: "/admin/articles", label: "Articles", icon: FileText },
-  { to: "/admin/payments", label: "Paiements", icon: CreditCard },
-  { to: "/admin/messages", label: "Messages", icon: MessageSquare },
-  { to: "/admin/ai-agent", label: "Agent IA", icon: Bot },
-  { to: "/admin/knowledge", label: "Base de connaissances", icon: BookOpen },
-  { to: "/admin/creative-studio", label: "Studio Créatif IA", icon: Wand2 },
-  { to: "/admin/users", label: "Utilisateurs & Rôles", icon: Shield },
-  { to: "/admin/settings", label: "Configuration", icon: Settings },
+type Item = { to: any; label: string; icon: any; exact?: boolean };
+type Group = { id: string; label: string; icon: any; items: Item[]; defaultOpen?: boolean };
+
+const GROUPS: Group[] = [
+  {
+    id: "pilotage",
+    label: "Pilotage",
+    icon: LayoutGrid,
+    defaultOpen: true,
+    items: [{ to: "/admin", label: "Vue d'ensemble", icon: LayoutGrid, exact: true }],
+  },
+  {
+    id: "studio",
+    label: "Gestion du studio",
+    icon: CalendarCheck,
+    defaultOpen: true,
+    items: [
+      { to: "/admin/bookings", label: "Réservations", icon: CalendarCheck },
+      { to: "/admin/planning", label: "Planning", icon: CalendarDays },
+      { to: "/admin/clients", label: "Clients", icon: Users },
+      { to: "/admin/coaches", label: "Coaches", icon: UserCog },
+      { to: "/admin/payments", label: "Paiements", icon: CreditCard },
+    ],
+  },
+  {
+    id: "offres",
+    label: "Offres & Catalogue",
+    icon: Package,
+    items: [
+      { to: "/admin/activities", label: "Catalogue & Activités", icon: ActivityIcon },
+      { to: "/admin/packs", label: "Packs", icon: Package },
+      { to: "/admin/promotions", label: "Promotions", icon: Sparkles },
+    ],
+  },
+  {
+    id: "contenu",
+    label: "Contenu & Communication",
+    icon: FileText,
+    items: [
+      { to: "/admin/articles", label: "Articles", icon: FileText },
+      { to: "/admin/creative-studio", label: "Studio Créatif IA", icon: Wand2 },
+    ],
+  },
+  {
+    id: "admin",
+    label: "Administration & IA",
+    icon: Bot,
+    items: [
+      { to: "/admin/ai-agent", label: "Centre Agent IA", icon: Bot },
+      { to: "/admin/messages", label: "Messages", icon: MessageSquare },
+      { to: "/admin/knowledge", label: "Base de connaissances", icon: BookOpen },
+      { to: "/admin/users", label: "Utilisateurs & Rôles", icon: Shield },
+      { to: "/admin/settings", label: "Configuration", icon: Settings },
+    ],
+  },
 ];
 
 export function AdminLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: s => s.location.pathname });
+  const { user } = useAuth();
+  const pending = useStore(s => s.bookings.filter(b => b.needsHumanValidation).length);
+
+  const activeGroup = useMemo(
+    () => GROUPS.find(g => g.items.some(i => (i.exact ? pathname === i.to : pathname.startsWith(i.to))))?.id,
+    [pathname]
+  );
+
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    for (const g of GROUPS) initial[g.id] = !!g.defaultOpen;
+    return initial;
+  });
+  const groupsWithActive = { ...openGroups, ...(activeGroup ? { [activeGroup]: true } : {}) };
+  const toggle = (id: string) => setOpenGroups(o => ({ ...o, [id]: !groupsWithActive[id] }));
 
   return (
     <div className="min-h-screen bg-[color:var(--cream)]">
       <div className="flex">
-        <aside className={`${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:sticky top-0 z-40 h-screen w-64 shrink-0 bg-[color:var(--forest)] text-[color:var(--cream)] transition-transform overflow-y-auto`}>
-          <div className="p-5 border-b border-white/10 flex items-center gap-2">
+        <aside className={`${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:sticky top-0 z-40 h-screen w-64 shrink-0 bg-[color:var(--forest)] text-[color:var(--cream)] transition-transform flex flex-col`}>
+          <div className="p-5 border-b border-white/10 flex items-center gap-2 shrink-0">
             <Lotus className="h-7 w-7" color="var(--cream)" />
             <div>
               <div className="font-serif text-lg">Amrani</div>
               <div className="text-[10px] uppercase tracking-widest opacity-60">Administration</div>
             </div>
           </div>
-          <nav className="p-3 space-y-0.5">
-            {NAV.map(n => {
-              const active = n.exact ? pathname === n.to : pathname.startsWith(n.to);
-              const Icon = n.icon;
+
+          <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+            {GROUPS.map(g => {
+              const isOpen = groupsWithActive[g.id];
+              const GIcon = g.icon;
               return (
-                <Link key={n.to} to={n.to} className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${active ? "bg-[color:var(--sage)] text-[color:var(--forest)] font-medium" : "text-white/75 hover:bg-white/10 hover:text-white"}`}>
-                  <Icon className="h-4 w-4" />{n.label}
-                </Link>
+                <div key={g.id}>
+                  <button
+                    onClick={() => toggle(g.id)}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-[11px] uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/5"
+                  >
+                    <GIcon className="h-3.5 w-3.5" />
+                    <span className="flex-1 text-left">{g.label}</span>
+                    {g.id === "studio" && pending > 0 && (
+                      <span className="text-[10px] bg-amber-400 text-[color:var(--forest)] rounded-full px-1.5 py-0.5 font-semibold">{pending}</span>
+                    )}
+                    {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                  </button>
+                  {isOpen && (
+                    <div className="mt-0.5 ml-2 pl-2 border-l border-white/10 space-y-0.5">
+                      {g.items.map(n => {
+                        const active = n.exact ? pathname === n.to : pathname.startsWith(n.to);
+                        const Icon = n.icon;
+                        return (
+                          <Link key={n.to} to={n.to} onClick={() => setOpen(false)}
+                            className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors ${active ? "bg-[color:var(--sage)] text-[color:var(--forest)] font-medium" : "text-white/75 hover:bg-white/10 hover:text-white"}`}>
+                            <Icon className="h-3.5 w-3.5" />
+                            <span className="flex-1 truncate">{n.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               );
             })}
           </nav>
-          <div className="p-4 mt-4 text-[10px] text-white/40">Amrani Admin v1 · Démo</div>
+
+          <div className="shrink-0 p-3 border-t border-white/10 space-y-1">
+            <div className="flex items-center gap-2 px-2 py-2">
+              <div className="h-8 w-8 rounded-full bg-[color:var(--sage)] text-[color:var(--forest)] grid place-items-center text-xs font-semibold">
+                {(user?.firstName?.[0] ?? "A") + (user?.lastName?.[0] ?? "")}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-medium truncate">{user ? `${user.firstName} ${user.lastName}` : "Admin"}</div>
+                <div className="text-[10px] text-white/50 truncate">{user?.email ?? "admin@amrani.ma"}</div>
+              </div>
+            </div>
+            <Link to="/" className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs text-white/75 hover:bg-white/10 hover:text-white">
+              <ExternalLink className="h-3.5 w-3.5" />Voir le site public
+            </Link>
+            <Link to="/admin/settings" className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs text-white/75 hover:bg-white/10 hover:text-white">
+              <UserCircle className="h-3.5 w-3.5" />Profil administrateur
+            </Link>
+            <button
+              onClick={() => { signOut(); window.location.href = "/admin/login"; }}
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs text-white/75 hover:bg-white/10 hover:text-white"
+            >
+              <LogOut className="h-3.5 w-3.5" />Se déconnecter
+            </button>
+          </div>
         </aside>
+
+        {open && <div onClick={() => setOpen(false)} className="fixed inset-0 bg-black/40 z-30 lg:hidden" />}
+
         <div className="flex-1 min-w-0">
           <header className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-border">
             <div className="flex items-center gap-3 px-4 lg:px-6 py-3">
@@ -65,12 +173,13 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <Link to="/admin/bookings" className="hidden md:inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-[color:var(--forest)] text-[color:var(--cream)] hover:opacity-90">+ Réservation</Link>
-                <button className="relative p-2 rounded-full hover:bg-secondary" aria-label="Notifications">
+                <Link to="/admin/ai-agent" className="relative p-2 rounded-full hover:bg-secondary" aria-label="Notifications">
                   <Bell className="h-4 w-4 text-[color:var(--forest)]" />
-                  <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[color:var(--forest)]" />
-                </button>
-                <Link to="/" className="hidden sm:inline text-muted-foreground hover:text-[color:var(--forest)]">Voir le site</Link>
-                <div className="h-8 w-8 rounded-full bg-[color:var(--sage)] text-[color:var(--forest)] grid place-items-center text-xs font-semibold">SA</div>
+                  {pending > 0 && <span className="absolute top-1 right-1 h-4 min-w-4 px-1 rounded-full bg-amber-400 text-[9px] font-bold text-[color:var(--forest)] grid place-items-center">{pending}</span>}
+                </Link>
+                <div className="h-8 w-8 rounded-full bg-[color:var(--sage)] text-[color:var(--forest)] grid place-items-center text-xs font-semibold">
+                  {(user?.firstName?.[0] ?? "A") + (user?.lastName?.[0] ?? "")}
+                </div>
               </div>
             </div>
           </header>
