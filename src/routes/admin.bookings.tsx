@@ -159,6 +159,31 @@ function BookingSheet({ id, onClose }: { id: string | null; onClose: () => void 
             )}
           </Section>
 
+          <Section title="Analyse de l'Agent IA">
+            <div className="p-4 rounded-xl bg-[color:var(--sage)]/15 border border-[color:var(--sage)]/40 space-y-2 text-sm">
+              <div className="flex items-center gap-2 text-xs">
+                <Sparkles className="h-4 w-4 text-[color:var(--forest)]" />
+                <TreatmentBadge t={b.treatment ?? "Créée par le client"} />
+                {typeof b.aiConfidence === "number" && <span className="text-muted-foreground">Confiance : <span className="font-medium text-[color:var(--forest)]">{b.aiConfidence}%</span></span>}
+              </div>
+              {b.aiAnalysis?.summary && <p><span className="text-muted-foreground text-xs">Résumé :</span> {b.aiAnalysis.summary}</p>}
+              {b.aiAnalysis?.checks && (
+                <ul className="text-xs space-y-1">
+                  {b.aiAnalysis.checks.map((k, i) => (
+                    <li key={i} className="flex items-center gap-1.5">
+                      {k.ok ? <CheckCircle2 className="h-3 w-3 text-emerald-600" /> : <XCircle className="h-3 w-3 text-red-600" />}{k.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {b.aiAnalysis?.problem && <p className="text-xs text-amber-900"><AlertTriangle className="h-3 w-3 inline mr-1" />{b.aiAnalysis.problem}</p>}
+              {b.aiAnalysis?.recommendation && <p className="text-xs"><span className="text-muted-foreground">Recommandation :</span> {b.aiAnalysis.recommendation}</p>}
+              {b.aiValidatedBy && <p className="text-xs text-muted-foreground">Validée par {b.aiValidatedBy}</p>}
+              {!b.aiAnalysis && !b.aiConfidence && <p className="text-xs text-muted-foreground">Réservation créée sans traitement IA.</p>}
+            </div>
+          </Section>
+
+
           <Section title="Suivi">
             <ol className="mt-2 space-y-2 border-l-2 border-[color:var(--sage)]/40 pl-4">
               {b.history.map((h, i) => (
