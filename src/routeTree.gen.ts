@@ -13,7 +13,9 @@ import { Route as PromotionsRouteImport } from './routes/promotions'
 import { Route as PlanningRouteImport } from './routes/planning'
 import { Route as PacksRouteImport } from './routes/packs'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as BookingRouteImport } from './routes/booking'
 import { Route as BlogRouteImport } from './routes/blog'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ActivitiesRouteImport } from './routes/activities'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -39,9 +41,19 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BookingRoute = BookingRouteImport.update({
+  id: '/booking',
+  path: '/booking',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogRoute = BlogRouteImport.update({
   id: '/blog',
   path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ActivitiesRoute = ActivitiesRouteImport.update({
@@ -69,7 +81,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/activities': typeof ActivitiesRoute
+  '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
+  '/booking': typeof BookingRoute
   '/contact': typeof ContactRoute
   '/packs': typeof PacksRoute
   '/planning': typeof PlanningRoute
@@ -80,7 +94,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/activities': typeof ActivitiesRoute
+  '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
+  '/booking': typeof BookingRoute
   '/contact': typeof ContactRoute
   '/packs': typeof PacksRoute
   '/planning': typeof PlanningRoute
@@ -92,7 +108,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/activities': typeof ActivitiesRoute
+  '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
+  '/booking': typeof BookingRoute
   '/contact': typeof ContactRoute
   '/packs': typeof PacksRoute
   '/planning': typeof PlanningRoute
@@ -105,7 +123,9 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/activities'
+    | '/auth'
     | '/blog'
+    | '/booking'
     | '/contact'
     | '/packs'
     | '/planning'
@@ -116,7 +136,9 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/activities'
+    | '/auth'
     | '/blog'
+    | '/booking'
     | '/contact'
     | '/packs'
     | '/planning'
@@ -127,7 +149,9 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/activities'
+    | '/auth'
     | '/blog'
+    | '/booking'
     | '/contact'
     | '/packs'
     | '/planning'
@@ -139,7 +163,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   ActivitiesRoute: typeof ActivitiesRoute
+  AuthRoute: typeof AuthRoute
   BlogRoute: typeof BlogRouteWithChildren
+  BookingRoute: typeof BookingRoute
   ContactRoute: typeof ContactRoute
   PacksRoute: typeof PacksRoute
   PlanningRoute: typeof PlanningRoute
@@ -176,11 +202,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/booking': {
+      id: '/booking'
+      path: '/booking'
+      fullPath: '/booking'
+      preLoaderRoute: typeof BookingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog': {
       id: '/blog'
       path: '/blog'
       fullPath: '/blog'
       preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/activities': {
@@ -228,7 +268,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ActivitiesRoute: ActivitiesRoute,
+  AuthRoute: AuthRoute,
   BlogRoute: BlogRouteWithChildren,
+  BookingRoute: BookingRoute,
   ContactRoute: ContactRoute,
   PacksRoute: PacksRoute,
   PlanningRoute: PlanningRoute,
