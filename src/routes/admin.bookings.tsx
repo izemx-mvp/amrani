@@ -6,7 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
-import { Search, Plus, Check, X, Clock, CheckCircle2, XCircle, MailIcon } from "lucide-react";
+import { Search, Plus, Check, X, Clock, CheckCircle2, XCircle, MailIcon, AlertTriangle, Sparkles } from "lucide-react";
+import { TreatmentBadge } from "@/routes/admin.ai-agent";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/bookings")({ component: Page });
