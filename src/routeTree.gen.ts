@@ -38,13 +38,10 @@ import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 import { Route as AdminPacksRouteImport } from './routes/admin.packs'
 import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
-import { Route as AdminKnowledgeRouteImport } from './routes/admin.knowledge'
-import { Route as AdminCreativeStudioRouteImport } from './routes/admin.creative-studio'
 import { Route as AdminCoachesRouteImport } from './routes/admin.coaches'
 import { Route as AdminClientsRouteImport } from './routes/admin.clients'
 import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
 import { Route as AdminArticlesRouteImport } from './routes/admin.articles'
-import { Route as AdminAiAgentRouteImport } from './routes/admin.ai-agent'
 import { Route as AdminActivitiesRouteImport } from './routes/admin.activities'
 
 const PromotionsRoute = PromotionsRouteImport.update({
@@ -192,16 +189,6 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminKnowledgeRoute = AdminKnowledgeRouteImport.update({
-  id: '/knowledge',
-  path: '/knowledge',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminCreativeStudioRoute = AdminCreativeStudioRouteImport.update({
-  id: '/creative-studio',
-  path: '/creative-studio',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminCoachesRoute = AdminCoachesRouteImport.update({
   id: '/coaches',
   path: '/coaches',
@@ -220,11 +207,6 @@ const AdminBookingsRoute = AdminBookingsRouteImport.update({
 const AdminArticlesRoute = AdminArticlesRouteImport.update({
   id: '/articles',
   path: '/articles',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminAiAgentRoute = AdminAiAgentRouteImport.update({
-  id: '/ai-agent',
-  path: '/ai-agent',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminActivitiesRoute = AdminActivitiesRouteImport.update({
@@ -248,13 +230,10 @@ export interface FileRoutesByFullPath {
   '/planning': typeof PlanningRoute
   '/promotions': typeof PromotionsRoute
   '/admin/activities': typeof AdminActivitiesRoute
-  '/admin/ai-agent': typeof AdminAiAgentRoute
   '/admin/articles': typeof AdminArticlesRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/coaches': typeof AdminCoachesRoute
-  '/admin/creative-studio': typeof AdminCreativeStudioRoute
-  '/admin/knowledge': typeof AdminKnowledgeRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/packs': typeof AdminPacksRoute
@@ -285,13 +264,10 @@ export interface FileRoutesByTo {
   '/planning': typeof PlanningRoute
   '/promotions': typeof PromotionsRoute
   '/admin/activities': typeof AdminActivitiesRoute
-  '/admin/ai-agent': typeof AdminAiAgentRoute
   '/admin/articles': typeof AdminArticlesRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/coaches': typeof AdminCoachesRoute
-  '/admin/creative-studio': typeof AdminCreativeStudioRoute
-  '/admin/knowledge': typeof AdminKnowledgeRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/packs': typeof AdminPacksRoute
@@ -325,13 +301,10 @@ export interface FileRoutesById {
   '/planning': typeof PlanningRoute
   '/promotions': typeof PromotionsRoute
   '/admin/activities': typeof AdminActivitiesRoute
-  '/admin/ai-agent': typeof AdminAiAgentRoute
   '/admin/articles': typeof AdminArticlesRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/coaches': typeof AdminCoachesRoute
-  '/admin/creative-studio': typeof AdminCreativeStudioRoute
-  '/admin/knowledge': typeof AdminKnowledgeRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/packs': typeof AdminPacksRoute
@@ -366,13 +339,10 @@ export interface FileRouteTypes {
     | '/planning'
     | '/promotions'
     | '/admin/activities'
-    | '/admin/ai-agent'
     | '/admin/articles'
     | '/admin/bookings'
     | '/admin/clients'
     | '/admin/coaches'
-    | '/admin/creative-studio'
-    | '/admin/knowledge'
     | '/admin/login'
     | '/admin/messages'
     | '/admin/packs'
@@ -403,13 +373,10 @@ export interface FileRouteTypes {
     | '/planning'
     | '/promotions'
     | '/admin/activities'
-    | '/admin/ai-agent'
     | '/admin/articles'
     | '/admin/bookings'
     | '/admin/clients'
     | '/admin/coaches'
-    | '/admin/creative-studio'
-    | '/admin/knowledge'
     | '/admin/login'
     | '/admin/messages'
     | '/admin/packs'
@@ -442,13 +409,10 @@ export interface FileRouteTypes {
     | '/planning'
     | '/promotions'
     | '/admin/activities'
-    | '/admin/ai-agent'
     | '/admin/articles'
     | '/admin/bookings'
     | '/admin/clients'
     | '/admin/coaches'
-    | '/admin/creative-studio'
-    | '/admin/knowledge'
     | '/admin/login'
     | '/admin/messages'
     | '/admin/packs'
@@ -688,20 +652,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/knowledge': {
-      id: '/admin/knowledge'
-      path: '/knowledge'
-      fullPath: '/admin/knowledge'
-      preLoaderRoute: typeof AdminKnowledgeRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/creative-studio': {
-      id: '/admin/creative-studio'
-      path: '/creative-studio'
-      fullPath: '/admin/creative-studio'
-      preLoaderRoute: typeof AdminCreativeStudioRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/coaches': {
       id: '/admin/coaches'
       path: '/coaches'
@@ -730,13 +680,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminArticlesRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/ai-agent': {
-      id: '/admin/ai-agent'
-      path: '/ai-agent'
-      fullPath: '/admin/ai-agent'
-      preLoaderRoute: typeof AdminAiAgentRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/activities': {
       id: '/admin/activities'
       path: '/activities'
@@ -749,13 +692,10 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminActivitiesRoute: typeof AdminActivitiesRoute
-  AdminAiAgentRoute: typeof AdminAiAgentRoute
   AdminArticlesRoute: typeof AdminArticlesRoute
   AdminBookingsRoute: typeof AdminBookingsRoute
   AdminClientsRoute: typeof AdminClientsRoute
   AdminCoachesRoute: typeof AdminCoachesRoute
-  AdminCreativeStudioRoute: typeof AdminCreativeStudioRoute
-  AdminKnowledgeRoute: typeof AdminKnowledgeRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
   AdminPacksRoute: typeof AdminPacksRoute
@@ -769,13 +709,10 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminActivitiesRoute: AdminActivitiesRoute,
-  AdminAiAgentRoute: AdminAiAgentRoute,
   AdminArticlesRoute: AdminArticlesRoute,
   AdminBookingsRoute: AdminBookingsRoute,
   AdminClientsRoute: AdminClientsRoute,
   AdminCoachesRoute: AdminCoachesRoute,
-  AdminCreativeStudioRoute: AdminCreativeStudioRoute,
-  AdminKnowledgeRoute: AdminKnowledgeRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminMessagesRoute: AdminMessagesRoute,
   AdminPacksRoute: AdminPacksRoute,

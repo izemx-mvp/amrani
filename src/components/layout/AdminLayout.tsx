@@ -49,17 +49,14 @@ const GROUPS: Group[] = [
     icon: FileText,
     items: [
       { to: "/admin/articles", label: "Articles", icon: FileText },
-      { to: "/admin/creative-studio", label: "Studio Créatif IA", icon: Wand2 },
     ],
   },
   {
     id: "admin",
-    label: "Administration & IA",
-    icon: Bot,
+    label: "Administration",
+    icon: Shield,
     items: [
-      { to: "/admin/ai-agent", label: "Centre Agent IA", icon: Bot },
       { to: "/admin/messages", label: "Messages", icon: MessageSquare },
-      { to: "/admin/knowledge", label: "Base de connaissances", icon: BookOpen },
       { to: "/admin/users", label: "Utilisateurs & Rôles", icon: Shield },
       { to: "/admin/settings", label: "Configuration", icon: Settings },
     ],
@@ -173,10 +170,10 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <Link to="/admin/bookings" className="hidden md:inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-[color:var(--forest)] text-[color:var(--cream)] hover:opacity-90">+ Réservation</Link>
-                <Link to="/admin/ai-agent" className="relative p-2 rounded-full hover:bg-secondary" aria-label="Notifications">
+                <div className="relative p-2 rounded-full hover:bg-secondary" aria-label="Notifications">
                   <Bell className="h-4 w-4 text-[color:var(--forest)]" />
                   {pending > 0 && <span className="absolute top-1 right-1 h-4 min-w-4 px-1 rounded-full bg-amber-400 text-[9px] font-bold text-[color:var(--forest)] grid place-items-center">{pending}</span>}
-                </Link>
+                </div>
                 <div className="h-8 w-8 rounded-full bg-[color:var(--sage)] text-[color:var(--forest)] grid place-items-center text-xs font-semibold">
                   {(user?.firstName?.[0] ?? "A") + (user?.lastName?.[0] ?? "")}
                 </div>
