@@ -56,7 +56,6 @@ const GROUPS: Group[] = [
     label: "Administration",
     icon: Shield,
     items: [
-      { to: "/admin/messages", label: "Messages", icon: MessageSquare },
       { to: "/admin/users", label: "Utilisateurs & Rôles", icon: Shield },
       { to: "/admin/settings", label: "Configuration", icon: Settings },
     ],
