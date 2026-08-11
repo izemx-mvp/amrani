@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { useStore, findCoach, coaches } from "@/lib/store";
+import { useStore, findCoach, getCoaches } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
@@ -83,8 +83,8 @@ function Catalog() {
           <FilterRow label="Discipline" options={CATEGORIES} value={cat} onChange={setCat} />
           <FilterRow label="Format" options={FORMATS} value={format} onChange={setFormat} />
           <FilterRow label="Niveau" options={LEVELS} value={level} onChange={setLevel} />
-          <FilterRow label="Coach" options={coaches.map(c => c.name)} value={coachId ? coaches.find(c => c.id === coachId)?.name ?? null : null}
-            onChange={(name) => setCoachId(name ? coaches.find(c => c.name === name)?.id ?? null : null)} />
+          <FilterRow label="Coach" options={getCoaches().map(c => c.name)} value={coachId ? getCoaches().find(c => c.id === coachId)?.name ?? null : null}
+            onChange={(name) => setCoachId(name ? getCoaches().find(c => c.name === name)?.id ?? null : null)} />
           <FilterRow label="Jour" options={days.map(([, l]) => l)} value={day ? days.find(([k]) => k === day)?.[1] ?? null : null}
             onChange={(l) => setDay(l ? days.find(([, x]) => x === l)?.[0] ?? null : null)} />
           <div className="flex flex-wrap items-center gap-3 justify-between pt-2 border-t border-border">

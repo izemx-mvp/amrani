@@ -13,6 +13,7 @@ function Page() {
   const payments = useStore(s => s.payments);
   const clients = useStore(s => s.clients);
   const [add, setAdd] = useState(false);
+  const [detail, setDetail] = useState<string | null>(null);
   const [q, setQ] = useState("");
 
   const total = payments.filter(p => p.status === "Payé").reduce((s, p) => s + p.amount, 0);
@@ -47,12 +48,36 @@ function Page() {
                     {(["Payé", "En attente", "Échoué", "Remboursé"] as PaymentStatus[]).map(s => <option key={s}>{s}</option>)}
                   </select>
                 </td>
-                <td className="p-3 text-right"><Button size="sm" variant="ghost">Détail</Button></td>
+                <td className="p-3 text-right"><Button size="sm" variant="ghost" onClick={() => setDetail(p.id)}>Détail</Button></td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {detail && (() => {
+        const p = payments.find(x => x.id === detail);
+        if (!p) return null;
+        return (
+          <Dialog open onOpenChange={o => !o && setDetail(null)}>
+            <DialogContent>
+              <DialogHeader><DialogTitle className="font-serif text-2xl text-[color:var(--forest)]">Transaction {p.id.slice(-8)}</DialogTitle></DialogHeader>
+              <div className="space-y-2 text-sm">
+                <Line label="Client" value={p.clientName} />
+                <Line label="Montant" value={`${p.amount} MAD`} />
+                <Line label="Mode" value={p.mode} />
+                <Line label="Date" value={new Date(p.date).toLocaleString("fr")} />
+                <Line label="Statut" value={p.status} />
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                {p.status !== "Remboursé" && <Button variant="outline" onClick={() => { actions.updatePaymentStatus(p.id, "Remboursé"); toast.success("Paiement remboursé"); setDetail(null); }}>Rembourser</Button>}
+                {p.status !== "Payé" && <Button onClick={() => { actions.updatePaymentStatus(p.id, "Payé"); toast.success("Paiement encaissé"); setDetail(null); }}>Marquer payé</Button>}
+                <Button variant="ghost" onClick={() => setDetail(null)}>Fermer</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        );
+      })()}
 
       {add && (
         <Dialog open onOpenChange={o => !o && setAdd(false)}>
@@ -98,4 +123,8 @@ function AddPaymentForm({ clients, onDone }: { clients: any[]; onDone: () => voi
 
 function Stat({ label, value }: { label: string; value: string }) {
   return <div className="p-5 rounded-2xl bg-card border border-border"><div className="text-xs uppercase tracking-widest text-muted-foreground">{label}</div><div className="font-serif text-3xl text-[color:var(--forest)] mt-2">{value}</div></div>;
+}
+
+function Line({ label, value }: { label: string; value: string }) {
+  return <div className="flex justify-between border-b border-border py-1.5"><span className="text-muted-foreground">{label}</span><span className="font-medium">{value}</span></div>;
 }

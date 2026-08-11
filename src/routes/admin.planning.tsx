@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/layout/AdminLayout";
-import { useStore, actions, findActivity, findCoach, coaches, type ScheduleSlot } from "@/lib/store";
+import { useStore, actions, findActivity, findCoach, getCoaches, type ScheduleSlot } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -25,7 +25,7 @@ function Page() {
   return (
     <div>
       <PageHeader title="Planning" subtitle="Un cours ajouté ici est immédiatement réservable côté client" actions={
-        <Button onClick={() => setEdit(blank(activities[0]?.id ?? "", coaches[0].id))}><Plus className="h-4 w-4 mr-1" />Ajouter un cours</Button>
+        <Button onClick={() => setEdit(blank(activities[0]?.id ?? "", getCoaches()[0].id))}><Plus className="h-4 w-4 mr-1" />Ajouter un cours</Button>
       } />
       <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit mb-6">
         {VIEWS.map(v => <button key={v} onClick={() => setView(v)} className={`px-4 py-1.5 rounded-md text-sm ${view === v ? "bg-white shadow-sm" : "text-muted-foreground"}`}>{v}</button>)}
@@ -115,7 +115,7 @@ function SlotDialog({ slot, activities, onClose }: { slot: ScheduleSlot; activit
           </F>
           <F label="Coach">
             <select value={s.coachId} onChange={e => setS({ ...s, coachId: e.target.value })} className="w-full h-10 px-3 rounded-md border border-border">
-              {coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              {getCoaches().map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </F>
           <F label="Date & heure"><Input type="datetime-local" value={dateStr} onChange={e => setS({ ...s, start: new Date(e.target.value).toISOString() })} /></F>

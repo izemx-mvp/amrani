@@ -1,24 +1,33 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { articles } from "@/lib/mock-data";
+import { useStore } from "@/lib/store";
+import { articles as seedArticles } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/blog/$slug")({
   head: ({ params }) => {
-    const a = articles.find(x => x.slug === params?.slug);
+    const a = seedArticles.find(x => x.slug === params?.slug);
     return { meta: [{ title: a ? `${a.title} — Amrani` : "Article — Amrani" }] };
-  },
-  loader: ({ params }) => {
-    const a = articles.find(x => x.slug === params.slug);
-    if (!a) throw notFound();
-    return a;
   },
   component: Article,
   notFoundComponent: () => <PublicLayout><div className="container-editorial py-24 text-center"><h1 className="font-serif text-4xl text-[color:var(--forest)]">Article introuvable</h1><Link to="/blog" className="mt-4 inline-block text-[color:var(--forest)] underline">Retour au journal</Link></div></PublicLayout>,
 });
 
 function Article() {
-  const a = Route.useLoaderData();
-  const related = articles.filter(x => x.slug !== a.slug && x.category === a.category).slice(0, 3);
+  const { slug } = Route.useParams();
+  const articles = useStore(s => s.articles);
+  const a = articles.find(x => x.slug === slug);
+  if (!a) {
+    return (
+      <PublicLayout>
+        <div className="container-editorial py-24 text-center">
+          <h1 className="font-serif text-4xl text-[color:var(--forest)]">Article introuvable</h1>
+          <Link to="/blog" className="mt-4 inline-block text-[color:var(--forest)] underline">Retour au journal</Link>
+        </div>
+      </PublicLayout>
+    );
+  }
+  const related = articles.filter(x => x.published && x.slug !== a.slug && x.category === a.category).slice(0, 3);
+
   return (
     <PublicLayout>
       <article className="container-editorial max-w-3xl py-16">

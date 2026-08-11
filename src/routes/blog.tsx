@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { articles } from "@/lib/mock-data";
+import { useStore } from "@/lib/store";
 import { useState } from "react";
 
 export const Route = createFileRoute("/blog")({
@@ -12,7 +12,8 @@ const CATS = ["Tous", "Yoga", "Pilates", "Bien-être", "Nutrition", "Lifestyle",
 
 function Blog() {
   const [cat, setCat] = useState<(typeof CATS)[number]>("Tous");
-  const items = cat === "Tous" ? articles : articles.filter(a => a.category === cat);
+  const published = useStore(s => s.articles).filter(a => a.published);
+  const items = cat === "Tous" ? published : published.filter(a => a.category === cat);
   const [featured, ...rest] = items;
 
   return (

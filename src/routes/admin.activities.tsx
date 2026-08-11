@@ -29,6 +29,7 @@ function Page() {
               <div className="text-sm text-muted-foreground mt-1">{a.price} MAD / séance</div>
               <div className="flex gap-2 mt-3 items-center">
                 <Button size="sm" variant="outline" className="flex-1" onClick={() => setEdit(a)}>Modifier</Button>
+                <Button size="sm" variant="ghost" className="text-destructive" onClick={() => { if (confirm(`Supprimer ${a.name} ?`)) { actions.deleteActivity(a.id); toast.success("Activité supprimée"); } }}>Supprimer</Button>
                 <Switch checked={a.active} onCheckedChange={() => { actions.toggleActivity(a.id); toast.success(a.active ? "Désactivé" : "Activé"); }} />
               </div>
             </div>

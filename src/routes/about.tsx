@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { coaches, IMG } from "@/lib/mock-data";
+import { IMG } from "@/lib/mock-data";
+import { useStore } from "@/lib/store";
 import { Lotus } from "@/components/brand/Logo";
 
 export const Route = createFileRoute("/about")({
@@ -16,6 +17,7 @@ const TIMELINE = [
 ];
 
 function About() {
+  const coaches = useStore(s => s.coaches).filter(c => c.active);
   return (
     <PublicLayout>
       <section className="container-editorial py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center">
