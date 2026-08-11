@@ -76,11 +76,11 @@ function Page() {
               const c = findCoach(b.coachId);
               const d = new Date(b.start);
               return (
-                <tr key={b.id} className={`border-t border-border hover:bg-[color:var(--cream)]/50 cursor-pointer ${b.needsHumanValidation ? "bg-amber-50/40" : ""}`} onClick={() => setSelected(b.id)}>
+                <tr key={b.id} className={`border-t border-border hover:bg-[color:var(--cream)]/50 cursor-pointer ${b.status === "En attente" ? "bg-amber-50/40" : ""}`} onClick={() => setSelected(b.id)}>
                   <td className="p-3 text-xs text-muted-foreground font-mono">{b.id.slice(-6)}</td>
                   <td className="p-3 font-medium">
                     {b.clientName}
-                    {b.needsHumanValidation && <span className="ml-2 inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800"><AlertTriangle className="h-2.5 w-2.5" />À valider</span>}
+                    {b.status === "En attente" && <span className="ml-2 inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800"><AlertTriangle className="h-2.5 w-2.5" />À valider</span>}
                   </td>
                   <td className="p-3">{a?.name}</td>
                   <td className="p-3 hidden md:table-cell">{c?.name}</td>

@@ -67,7 +67,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: s => s.location.pathname });
   const { user } = useAuth();
-  const pending = useStore(s => s.bookings.filter(b => b.needsHumanValidation).length);
+  const pending = useStore(s => s.bookings.filter(b => b.status === "En attente").length);
 
   const activeGroup = useMemo(
     () => GROUPS.find(g => g.items.some(i => (i.exact ? pathname === i.to : pathname.startsWith(i.to))))?.id,

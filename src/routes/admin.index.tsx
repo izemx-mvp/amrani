@@ -20,7 +20,7 @@ function Overview() {
   const promotions = useStore(s => s.promotions);
   const activities = useStore(s => s.activities);
   const payments = useStore(s => s.payments);
-  const journal = useStore(s => s.aiJournal);
+  
 
   const today = new Date().toDateString();
   const todayBookings = bookings.filter(b => new Date(b.start).toDateString() === today);
