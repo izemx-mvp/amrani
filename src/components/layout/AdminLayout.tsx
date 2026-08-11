@@ -3,7 +3,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Lotus } from "@/components/brand/Logo";
 import {
   LayoutGrid, CalendarCheck, CalendarDays, Users, Activity as ActivityIcon, UserCog,
-  Package, Sparkles, FileText, MessageSquare, Bot, BookOpen, Wand2, Shield, Settings, Menu, X,
+  Package, Sparkles, FileText, Bot, BookOpen, Wand2, Shield, Settings, Menu, X,
   CreditCard, Search, Bell, ChevronDown, ChevronRight, LogOut, ExternalLink, UserCircle,
 } from "lucide-react";
 import { signOut, useAuth } from "@/lib/auth";
