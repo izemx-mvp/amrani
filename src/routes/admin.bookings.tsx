@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
 import { Search, Plus, Check, X, Clock, CheckCircle2, XCircle, MailIcon, AlertTriangle, Sparkles } from "lucide-react";
-import { TreatmentBadge } from "@/routes/admin.ai-agent";
+
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/bookings")({ component: Page });
@@ -67,8 +67,6 @@ function Page() {
               <th className="p-3">#</th><th className="p-3">Client</th><th className="p-3">Activité</th>
               <th className="p-3 hidden md:table-cell">Coach</th><th className="p-3">Date</th>
               <th className="p-3 hidden xl:table-cell">Pack</th>
-              <th className="p-3 hidden lg:table-cell">Traitement</th>
-              <th className="p-3 hidden lg:table-cell">Confiance IA</th>
               <th className="p-3">Statut</th><th></th>
             </tr>
           </thead>
@@ -88,8 +86,6 @@ function Page() {
                   <td className="p-3 hidden md:table-cell">{c?.name}</td>
                   <td className="p-3">{d.toLocaleDateString("fr", { day: "2-digit", month: "short" })} · {d.toLocaleTimeString("fr", { hour: "2-digit", minute: "2-digit" })}</td>
                   <td className="p-3 hidden xl:table-cell">{b.packId ? findPack(b.packId)?.name : "—"}</td>
-                  <td className="p-3 hidden lg:table-cell"><TreatmentBadge t={b.treatment ?? "Créée par le client"} /></td>
-                  <td className="p-3 hidden lg:table-cell text-xs">{typeof b.aiConfidence === "number" ? `${b.aiConfidence}%` : "—"}</td>
                   <td className="p-3"><StatusBadge s={b.status} /></td>
                   <td className="p-3 text-right"><Button size="sm" variant="ghost">Ouvrir</Button></td>
                 </tr>
@@ -159,29 +155,6 @@ function BookingSheet({ id, onClose }: { id: string | null; onClose: () => void 
             )}
           </Section>
 
-          <Section title="Analyse de l'Agent IA">
-            <div className="p-4 rounded-xl bg-[color:var(--sage)]/15 border border-[color:var(--sage)]/40 space-y-2 text-sm">
-              <div className="flex items-center gap-2 text-xs">
-                <Sparkles className="h-4 w-4 text-[color:var(--forest)]" />
-                <TreatmentBadge t={b.treatment ?? "Créée par le client"} />
-                {typeof b.aiConfidence === "number" && <span className="text-muted-foreground">Confiance : <span className="font-medium text-[color:var(--forest)]">{b.aiConfidence}%</span></span>}
-              </div>
-              {b.aiAnalysis?.summary && <p><span className="text-muted-foreground text-xs">Résumé :</span> {b.aiAnalysis.summary}</p>}
-              {b.aiAnalysis?.checks && (
-                <ul className="text-xs space-y-1">
-                  {b.aiAnalysis.checks.map((k, i) => (
-                    <li key={i} className="flex items-center gap-1.5">
-                      {k.ok ? <CheckCircle2 className="h-3 w-3 text-emerald-600" /> : <XCircle className="h-3 w-3 text-red-600" />}{k.label}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {b.aiAnalysis?.problem && <p className="text-xs text-amber-900"><AlertTriangle className="h-3 w-3 inline mr-1" />{b.aiAnalysis.problem}</p>}
-              {b.aiAnalysis?.recommendation && <p className="text-xs"><span className="text-muted-foreground">Recommandation :</span> {b.aiAnalysis.recommendation}</p>}
-              {b.aiValidatedBy && <p className="text-xs text-muted-foreground">Validée par {b.aiValidatedBy}</p>}
-              {!b.aiAnalysis && !b.aiConfidence && <p className="text-xs text-muted-foreground">Réservation créée sans traitement IA.</p>}
-            </div>
-          </Section>
 
 
           <Section title="Suivi">
