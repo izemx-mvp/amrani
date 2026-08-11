@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/layout/AdminLayout";
-import { useStore, actions, findActivity, findCoach, findPack, coaches, type BookingStatus, type BookingSource, type PaymentMode } from "@/lib/store";
+import { useStore, actions, findActivity, findCoach, findPack, getCoaches, type BookingStatus, type BookingSource, type PaymentMode } from "@/lib/store";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,7 @@ function Page() {
         </select>
         <select value={coachFilter} onChange={e => setCoachFilter(e.target.value)} className="h-10 px-3 rounded-md border border-border bg-background text-sm">
           <option value="">Tous coachs</option>
-          {coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          {getCoaches().map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </div>
 
@@ -190,7 +190,8 @@ function BookingSheet({ id, onClose }: { id: string | null; onClose: () => void 
             {!["Annulée", "Refusée", "Terminée"].includes(b.status) && (
               <Button variant="outline" onClick={() => setStatus("Annulée")}><X className="h-4 w-4 mr-1" />Annuler</Button>
             )}
-            <Button variant="ghost"><MailIcon className="h-4 w-4 mr-1" />Contacter</Button>
+            <Button variant="ghost" onClick={() => { window.location.href = `mailto:${b.clientEmail ?? ""}?subject=${encodeURIComponent("Votre réservation Amrani")}`; }}><MailIcon className="h-4 w-4 mr-1" />Contacter</Button>
+            <Button variant="ghost" className="text-destructive" onClick={() => { if (confirm("Supprimer définitivement cette réservation ?")) { actions.deleteBooking(b.id); toast.success("Réservation supprimée"); setSelected(null); } }}>Supprimer</Button>
           </div>
         </div>
       </SheetContent>

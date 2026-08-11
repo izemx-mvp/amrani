@@ -46,3 +46,10 @@ export function useAuth() {
   }, []);
   return { user, hydrated, isAuthenticated: !!user, isAdmin: user?.role === "admin" };
 }
+
+export function updateUser(patch: Partial<User>) {
+  const current = getUser();
+  if (!current) return;
+  localStorage.setItem(KEY, JSON.stringify({ ...current, ...patch }));
+  emit();
+}

@@ -9,7 +9,9 @@ import {
   promotions as seedPromotions,
   clients as seedClients,
   bookings as seedBookings,
+  articles as seedArticles,
 } from "./mock-data";
+
 
 export type BookingStatus =
   | "En attente" | "Confirmée" | "Refusée" | "Annulée" | "Terminée" | "Absente";
@@ -78,6 +80,31 @@ export type Payment = {
   mode: PaymentMode; status: PaymentStatus; date: string;
 };
 
+export type Coach = {
+  id: string; name: string; role: string; bio: string; image: string;
+  email?: string; phone?: string; active: boolean;
+};
+
+export type Article = {
+  slug: string; title: string; category: string; author: string; date: string;
+  readMin: number; image: string; excerpt: string; content: string;
+  published: boolean;
+};
+
+export type StaffUser = {
+  id: string; name: string; email: string; role: string; active: boolean;
+};
+
+export type Settings = {
+  studioName: string; description: string; email: string; phone: string; address: string;
+  instagram: string; facebook: string; tiktok: string;
+  hours: Record<string, string>;
+  manualValidation: boolean; waitlist: boolean; reminders: boolean;
+  minDelay: string; maxDelay: string; cancelPolicy: string; maxCapacity: number;
+  emailNotifications: boolean; pushNotifications: boolean;
+  primaryColor: string; logoUrl: string;
+};
+
 type State = {
   activities: Activity[];
   schedule: ScheduleSlot[];
@@ -86,9 +113,40 @@ type State = {
   clients: Client[];
   bookings: Booking[];
   payments: Payment[];
+  coaches: Coach[];
+  articles: Article[];
+  staff: StaffUser[];
+  settings: Settings;
 };
 
-const KEY = "amrani.store.manual.v1";
+const DAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+
+const defaultSettings: Settings = {
+  studioName: "Amrani",
+  description: "Un espace dédié au mouvement, à l'énergie et à votre bien-être.",
+  email: "hello@amrani-studio.com",
+  phone: "+212 5 22 00 00 00",
+  address: "12 rue des Oliviers, Casablanca",
+  instagram: "https://instagram.com/amrani.studio",
+  facebook: "https://facebook.com/amrani.studio",
+  tiktok: "",
+  hours: Object.fromEntries(DAYS.map((d, i) => [d, i < 5 ? "07:00 – 21:00" : i === 5 ? "08:00 – 19:00" : "09:00 – 14:00"])),
+  manualValidation: true, waitlist: false, reminders: true,
+  minDelay: "2h", maxDelay: "30 j", cancelPolicy: "6h avant · gratuit", maxCapacity: 14,
+  emailNotifications: true, pushNotifications: false,
+  primaryColor: "#17352C", logoUrl: "",
+};
+
+const defaultStaff: StaffUser[] = [
+  { id: "u1", name: "Sofia Amrani", role: "Super Administrateur", email: "sofia@amrani.com", active: true },
+  { id: "u2", name: "Leila Bennani", role: "Coach", email: "leila@amrani.com", active: true },
+  { id: "u3", name: "Karim Nouri", role: "Coach", email: "karim@amrani.com", active: true },
+  { id: "u4", name: "Meryem Ouazzani", role: "Réception", email: "meryem@amrani.com", active: true },
+  { id: "u5", name: "Ines Chraibi", role: "Gestionnaire de contenu", email: "ines@amrani.com", active: true },
+];
+
+const KEY = "amrani.store.manual.v2";
+
 
 function seed(): State {
   const bookings = seedBookings.map((b, i) => {
@@ -123,19 +181,26 @@ function seed(): State {
       status: (["Payé", "Payé", "En attente", "Payé"] as PaymentStatus[])[i % 4],
       date: new Date(Date.now() - i * 86400000).toISOString(),
     })),
+    coaches: seedCoaches.map(c => ({ ...c, email: `${c.id}@amrani.com`, phone: "+212 6 00 00 00 00", active: true })),
+    articles: seedArticles.map((a, i) => ({ ...a, published: i % 4 !== 3 })),
+    staff: defaultStaff.map(u => ({ ...u })),
+    settings: { ...defaultSettings, hours: { ...defaultSettings.hours } },
   };
 }
 
 let state: State = load();
 
 function load(): State {
-  if (typeof window === "undefined") return seed();
+  const base = seed();
+  if (typeof window === "undefined") return base;
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return seed();
-    return JSON.parse(raw) as State;
-  } catch { return seed(); }
+    if (!raw) return base;
+    const saved = JSON.parse(raw) as Partial<State>;
+    return { ...base, ...saved, settings: { ...base.settings, ...(saved.settings ?? {}) } };
+  } catch { return base; }
 }
+
 
 function persist() {
   if (typeof window === "undefined") return;
@@ -149,7 +214,7 @@ const subscribe = (cb: () => void) => { listeners.add(cb); return () => listener
 const getSnapshot = () => state;
 const serverSnapshot = () => state;
 
-export const coaches = seedCoaches;
+export const getCoaches = () => state.coaches;
 
 // Selectors
 export function useStore<T>(sel: (s: State) => T): T {
@@ -294,6 +359,80 @@ export const actions = {
     state = { ...state, payments: state.payments.map(p => p.id === id ? { ...p, status } : p) };
     notify();
   },
+  deletePayment(id: string) {
+    state = { ...state, payments: state.payments.filter(p => p.id !== id) };
+    notify();
+  },
+
+  // Clients / bookings deletion
+  deleteClient(id: string) {
+    state = { ...state, clients: state.clients.filter(c => c.id !== id) };
+    notify();
+  },
+  deleteBooking(id: string) {
+    state = { ...state, bookings: state.bookings.filter(b => b.id !== id) };
+    notify();
+  },
+  deleteActivity(id: string) {
+    state = {
+      ...state,
+      activities: state.activities.filter(a => a.id !== id),
+      schedule: state.schedule.filter(s => s.activityId !== id),
+    };
+    notify();
+  },
+
+  // Coaches
+  saveCoach(c: Coach) {
+    const exists = state.coaches.some(x => x.id === c.id);
+    state = { ...state, coaches: exists ? state.coaches.map(x => x.id === c.id ? c : x) : [...state.coaches, c] };
+    notify();
+  },
+  toggleCoach(id: string) {
+    state = { ...state, coaches: state.coaches.map(c => c.id === id ? { ...c, active: !c.active } : c) };
+    notify();
+  },
+  deleteCoach(id: string) {
+    state = { ...state, coaches: state.coaches.filter(c => c.id !== id) };
+    notify();
+  },
+
+  // Articles
+  saveArticle(a: Article, originalSlug?: string) {
+    const key = originalSlug ?? a.slug;
+    const exists = state.articles.some(x => x.slug === key);
+    state = { ...state, articles: exists ? state.articles.map(x => x.slug === key ? a : x) : [a, ...state.articles] };
+    notify();
+  },
+  toggleArticle(slug: string) {
+    state = { ...state, articles: state.articles.map(a => a.slug === slug ? { ...a, published: !a.published } : a) };
+    notify();
+  },
+  deleteArticle(slug: string) {
+    state = { ...state, articles: state.articles.filter(a => a.slug !== slug) };
+    notify();
+  },
+
+  // Staff users
+  saveStaff(u: StaffUser) {
+    const exists = state.staff.some(x => x.id === u.id);
+    state = { ...state, staff: exists ? state.staff.map(x => x.id === u.id ? u : x) : [...state.staff, u] };
+    notify();
+  },
+  toggleStaff(id: string) {
+    state = { ...state, staff: state.staff.map(u => u.id === id ? { ...u, active: !u.active } : u) };
+    notify();
+  },
+  deleteStaff(id: string) {
+    state = { ...state, staff: state.staff.filter(u => u.id !== id) };
+    notify();
+  },
+
+  // Settings
+  saveSettings(patch: Partial<Settings>) {
+    state = { ...state, settings: { ...state.settings, ...patch } };
+    notify();
+  },
 
 };
 
@@ -307,7 +446,8 @@ export function findAlternatives(activityId: string, excludeSlotId?: string, max
 
 // Helpers
 export const findActivity = (id: string) => state.activities.find(a => a.id === id);
-export const findCoach = (id: string) => coaches.find(c => c.id === id);
+export const findCoach = (id: string) => state.coaches.find(c => c.id === id);
+
 export const findPack = (id: string) => state.packs.find(p => p.id === id);
 export const findClient = (id: string) => state.clients.find(c => c.id === id);
 export const findSlot = (id: string) => state.schedule.find(s => s.id === id);
