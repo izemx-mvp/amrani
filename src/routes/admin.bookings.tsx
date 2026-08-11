@@ -191,7 +191,7 @@ function BookingSheet({ id, onClose }: { id: string | null; onClose: () => void 
               <Button variant="outline" onClick={() => setStatus("Annulée")}><X className="h-4 w-4 mr-1" />Annuler</Button>
             )}
             <Button variant="ghost" onClick={() => { window.location.href = `mailto:${b.clientEmail ?? ""}?subject=${encodeURIComponent("Votre réservation Amrani")}`; }}><MailIcon className="h-4 w-4 mr-1" />Contacter</Button>
-            <Button variant="ghost" className="text-destructive" onClick={() => { if (confirm("Supprimer définitivement cette réservation ?")) { actions.deleteBooking(b.id); toast.success("Réservation supprimée"); setSelected(null); } }}>Supprimer</Button>
+            <Button variant="ghost" className="text-destructive" onClick={() => { if (confirm("Supprimer définitivement cette réservation ?")) { actions.deleteBooking(b.id); toast.success("Réservation supprimée"); onClose(); } }}>Supprimer</Button>
           </div>
         </div>
       </SheetContent>
